@@ -1,7 +1,5 @@
+"use client";
+
 export default function Home() {
-  return (
-    <main>
-      <h1>capytraders</h1>
-    </main>
-  );
+  return <main style={{ width: "100vw", height: "100vh" }} />;
 }
