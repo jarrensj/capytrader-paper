@@ -7,7 +7,9 @@ import Player from "./Player";
 import Environment from "./Environment";
 import EmoteButtons from "./EmoteButtons";
 import MobileControls from "./MobileControls";
+import OtherPlayers from "./OtherPlayers";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
+import { useMultiplayer } from "@/hooks/useMultiplayer";
 
 interface GameProps {
   username: string;
@@ -68,6 +70,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [mobileInput, setMobileInput] = useState({ x: 0, z: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [nameInput, setNameInput] = useState(username);
+  const { otherPlayers, connected, updatePosition } = useMultiplayer(username);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -97,10 +100,27 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           emote={currentEmote}
           onClearEmote={clearEmote}
           mobileInput={mobileInput}
+          onPositionUpdate={updatePosition}
         />
+        <OtherPlayers players={otherPlayers} />
       </Canvas>
       <EmoteButtons onEmote={(emote) => triggerEmote(emote as EmoteType)} />
       <MobileControls onMove={handleMobileMove} />
+      <div
+        style={{
+          position: "fixed",
+          top: 10,
+          left: 10,
+          padding: "4px 8px",
+          borderRadius: 4,
+          backgroundColor: connected ? "rgba(34, 197, 94, 0.8)" : "rgba(239, 68, 68, 0.8)",
+          color: "white",
+          fontSize: 12,
+          fontWeight: "bold",
+        }}
+      >
+        {connected ? `Online (${otherPlayers.length + 1})` : "Connecting..."}
+      </div>
       <button
         onClick={() => setShowSettings(true)}
         style={{

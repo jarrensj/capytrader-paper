@@ -18,9 +18,10 @@ interface PlayerProps {
   emote: EmoteType;
   onClearEmote: () => void;
   mobileInput?: { x: number; z: number };
+  onPositionUpdate?: (position: [number, number, number], rotation: number) => void;
 }
 
-export default function Player({ username, emote, onClearEmote, mobileInput = { x: 0, z: 0 } }: PlayerProps) {
+export default function Player({ username, emote, onClearEmote, mobileInput = { x: 0, z: 0 }, onPositionUpdate }: PlayerProps) {
   const groupRef = useRef<Group>(null);
   const [, getKeys] = useKeyboardControls();
   const velocity = useRef(new Vector3());
@@ -87,6 +88,14 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     // Smooth camera follow using lerp
     camera.position.lerp(targetCameraPosition, CAMERA_LERP_FACTOR);
     camera.lookAt(playerPosition.x, playerPosition.y + 1, playerPosition.z);
+
+    // Report position for multiplayer
+    if (onPositionUpdate) {
+      onPositionUpdate(
+        [groupRef.current.position.x, groupRef.current.position.y, groupRef.current.position.z],
+        groupRef.current.rotation.y
+      );
+    }
   });
 
   return (
