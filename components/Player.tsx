@@ -116,13 +116,15 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     if (left) dirX -= 1;
     if (right) dirX += 1;
 
-    // Add mobile joystick input
-    dirX += mobileInput.x;
-    dirZ += mobileInput.z;
+    // Add mobile joystick input (with dead zone)
+    const mobileX = Math.abs(mobileInput.x) > 0.15 ? mobileInput.x : 0;
+    const mobileZ = Math.abs(mobileInput.z) > 0.15 ? mobileInput.z : 0;
+    dirX += mobileX;
+    dirZ += mobileZ;
 
     // Normalize
     const length = Math.sqrt(dirX * dirX + dirZ * dirZ);
-    const isMoving = length > 0.1;
+    const isMoving = length > 0.15;
 
     if (isMoving) {
       dirX /= length;
@@ -142,13 +144,14 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       }
     } else {
       // Stop immediately when no input
-      velocity.current.x = 0;
-      velocity.current.z = 0;
+      velocity.current.set(0, 0, 0);
     }
 
-    // Apply movement
-    groupRef.current.position.x += velocity.current.x * delta;
-    groupRef.current.position.z += velocity.current.z * delta;
+    // Apply movement only if velocity is significant
+    if (Math.abs(velocity.current.x) > 0.01 || Math.abs(velocity.current.z) > 0.01) {
+      groupRef.current.position.x += velocity.current.x * delta;
+      groupRef.current.position.z += velocity.current.z * delta;
+    }
 
     // Third-person camera follow with orbit
     const playerPosition = groupRef.current.position;
