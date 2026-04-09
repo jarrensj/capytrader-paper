@@ -89,10 +89,12 @@ export default function MobileControls({ onMove }: MobileControlsProps) {
         width: "120px",
         height: "120px",
         borderRadius: "50%",
-        backgroundColor: "rgba(0, 0, 0, 0.3)",
-        border: "2px solid rgba(255, 255, 255, 0.3)",
+        backgroundColor: "rgba(250, 248, 240, 0.8)",
+        border: "2px solid var(--charcoal-300)",
         touchAction: "none",
         zIndex: 100,
+        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.1)",
+        backdropFilter: "blur(8px)",
       }}
     >
       <div
@@ -103,9 +105,11 @@ export default function MobileControls({ onMove }: MobileControlsProps) {
           width: "50px",
           height: "50px",
           borderRadius: "50%",
-          backgroundColor: "rgba(255, 255, 255, 0.5)",
+          backgroundColor: "var(--sage-200)",
+          border: "1px solid var(--sage-300)",
           transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px))`,
           transition: active ? "none" : "transform 0.1s ease-out",
+          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
         }}
       />
     </div>

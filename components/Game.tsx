@@ -111,44 +111,65 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       <div
         style={{
           position: "fixed",
-          top: 10,
-          left: 10,
-          padding: "4px 8px",
-          borderRadius: 4,
-          backgroundColor: connected ? "rgba(34, 197, 94, 0.8)" : "rgba(239, 68, 68, 0.8)",
-          color: "white",
-          fontSize: 12,
-          fontWeight: "bold",
+          top: 16,
+          left: 16,
+          padding: "8px 16px",
+          borderRadius: "1rem",
+          backgroundColor: "rgba(250, 248, 240, 0.95)",
+          backdropFilter: "blur(8px)",
+          color: "var(--charcoal-700)",
+          fontSize: 13,
+          fontWeight: 500,
+          fontFamily: "var(--font-zen)",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
         }}
       >
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: connected ? "var(--sage-500)" : "var(--charcoal-400)",
+          }}
+        />
         {connected ? `Online (${otherPlayers.length + 1})` : "Connecting..."}
       </div>
       <button
         onClick={() => setShowSettings(true)}
         style={{
           position: "fixed",
-          top: 10,
-          right: 10,
-          padding: "8px 12px",
-          borderRadius: 4,
-          backgroundColor: "rgba(0, 0, 0, 0.6)",
-          color: "white",
+          top: 16,
+          right: 16,
+          padding: "8px 16px",
+          borderRadius: "1rem",
+          backgroundColor: "var(--charcoal-700)",
+          color: "var(--matcha-cream)",
           border: "none",
           cursor: "pointer",
-          fontSize: 14,
+          fontSize: 13,
+          fontWeight: 500,
+          fontFamily: "var(--font-zen)",
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 8,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+          transition: "background-color 0.2s ease-out",
         }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
       >
-        {username} <span style={{ opacity: 0.7 }}>edit</span>
+        {username} <span style={{ opacity: 0.6, fontWeight: 400 }}>edit</span>
       </button>
       {showSettings && (
         <div
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -157,16 +178,32 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           onClick={() => setShowSettings(false)}
         >
           <div
+            className="sketch-border animate-fade-in"
             style={{
-              backgroundColor: "white",
-              padding: 24,
-              borderRadius: 8,
-              minWidth: 300,
+              backgroundColor: "var(--matcha-cream)",
+              padding: 28,
+              borderRadius: "1.5rem",
+              minWidth: 320,
+              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ margin: "0 0 16px", color: "#333" }}>Settings</h3>
-            <label style={{ display: "block", marginBottom: 8, color: "#666" }}>
+            <h3 style={{
+              margin: "0 0 20px",
+              color: "var(--charcoal-800)",
+              fontFamily: "var(--font-noto)",
+              fontSize: 20,
+              fontWeight: 500,
+            }}>
+              Settings
+            </h3>
+            <label style={{
+              display: "block",
+              marginBottom: 8,
+              color: "var(--charcoal-500)",
+              fontFamily: "var(--font-zen)",
+              fontSize: 13,
+            }}>
               Name
             </label>
             <input
@@ -175,25 +212,38 @@ export default function Game({ username, onUsernameChange }: GameProps) {
               onChange={(e) => setNameInput(e.target.value)}
               style={{
                 width: "100%",
-                padding: 8,
-                borderRadius: 4,
-                border: "1px solid #ccc",
-                marginBottom: 16,
+                padding: "12px 14px",
+                borderRadius: "0.75rem",
+                border: "1px solid var(--charcoal-200)",
+                backgroundColor: "var(--matcha-100)",
+                marginBottom: 20,
                 boxSizing: "border-box",
+                fontSize: 14,
+                fontFamily: "var(--font-zen)",
+                color: "var(--charcoal-700)",
+                outline: "none",
+                transition: "border-color 0.2s ease-out",
               }}
+              onFocus={(e) => e.currentTarget.style.borderColor = "var(--charcoal-400)"}
+              onBlur={(e) => e.currentTarget.style.borderColor = "var(--charcoal-200)"}
             />
             <button
               onClick={handleSaveName}
               style={{
                 width: "100%",
-                padding: 10,
-                borderRadius: 4,
-                backgroundColor: "#4CAF50",
-                color: "white",
+                padding: "12px 16px",
+                borderRadius: "0.75rem",
+                backgroundColor: "var(--charcoal-700)",
+                color: "var(--matcha-cream)",
                 border: "none",
                 cursor: "pointer",
-                fontWeight: "bold",
+                fontWeight: 500,
+                fontSize: 14,
+                fontFamily: "var(--font-zen)",
+                transition: "background-color 0.2s ease-out",
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
             >
               Save
             </button>

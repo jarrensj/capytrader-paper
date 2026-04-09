@@ -1,3 +1,35 @@
+:root {
+  /* Matcha */
+  --matcha-cream: #FAF8F0;
+  --matcha-light: #F5F2E8;
+  --matcha-100: #E8E5DB;
+  --matcha-200: #D4D0C4;
+
+  /* Charcoal */
+  --charcoal-50: #F8F8F8;
+  --charcoal-100: #E8E8E8;
+  --charcoal-200: #D1D1D1;
+  --charcoal-300: #B4B4B4;
+  --charcoal-400: #888888;
+  --charcoal-500: #666666;
+  --charcoal-600: #444444;
+  --charcoal-700: #333333;
+  --charcoal-800: #2A2A2A;
+  --charcoal-900: #1F1F1F;
+
+  /* Sage */
+  --sage-50: #F6F7F3;
+  --sage-100: #E9EDE1;
+  --sage-200: #D5DCC7;
+  --sage-300: #B8C5A4;
+  --sage-400: #9AAE81;
+  --sage-500: #7D9560;
+
+  /* Typography */
+  --font-noto: 'Noto Sans JP', sans-serif;
+  --font-zen: 'Zen Kaku Gothic New', sans-serif;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -10,9 +42,43 @@ body {
   height: 100%;
   overflow: hidden;
   background-color: #87CEEB;
+  font-family: var(--font-zen);
 }
 
 canvas {
   display: block;
   touch-action: none;
+}
+
+.sketch-border {
+  position: relative;
+}
+
+.sketch-border::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--charcoal-600);
+  border-radius: inherit;
+  opacity: 0.6;
+  transform: rotate(-0.5deg);
+  pointer-events: none;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
 }

@@ -56,44 +56,48 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
         position: "fixed",
         bottom: "100px",
         left: "16px",
-        width: "300px",
+        width: "320px",
         zIndex: 1000,
       }}
     >
       <div
         style={{
-          background: "rgba(0, 0, 0, 0.7)",
-          borderRadius: "8px",
+          background: "rgba(250, 248, 240, 0.95)",
+          backdropFilter: "blur(8px)",
+          borderRadius: "1rem",
           overflow: "hidden",
+          border: "1px solid var(--charcoal-200)",
+          boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
         <div
           style={{
             height: "120px",
             overflowY: "auto",
-            padding: "8px",
+            padding: "12px",
             display: "flex",
             flexDirection: "column",
-            gap: "4px",
+            gap: "6px",
+            fontFamily: "var(--font-zen)",
           }}
         >
           {messages.length === 0 ? (
-            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+            <div style={{ color: "var(--charcoal-400)", fontSize: "13px" }}>
               No messages yet...
             </div>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} style={{ fontSize: "13px" }}>
-                <span style={{ color: "#7dd3fc", fontWeight: "bold" }}>
+              <div key={msg.id} style={{ fontSize: "13px", lineHeight: 1.4 }}>
+                <span style={{ color: "var(--sage-500)", fontWeight: 600 }}>
                   {msg.name}:
                 </span>{" "}
-                <span style={{ color: "white" }}>{msg.text}</span>
+                <span style={{ color: "var(--charcoal-700)" }}>{msg.text}</span>
               </div>
             ))
           )}
           <div ref={messagesEndRef} />
         </div>
-        <form onSubmit={handleSubmit} style={{ padding: "8px" }}>
+        <form onSubmit={handleSubmit} style={{ padding: "8px 12px 12px" }}>
           <input
             ref={inputRef}
             type="text"
@@ -105,14 +109,24 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
             readOnly={!hasAcceptedTOS}
             style={{
               width: "100%",
-              padding: "8px",
-              borderRadius: "4px",
-              border: "none",
-              background: hasAcceptedTOS ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)",
-              color: hasAcceptedTOS ? "white" : "rgba(255, 255, 255, 0.4)",
+              padding: "10px 14px",
+              borderRadius: "0.75rem",
+              border: "1px solid var(--charcoal-200)",
+              background: hasAcceptedTOS ? "var(--matcha-100)" : "var(--matcha-200)",
+              color: hasAcceptedTOS ? "var(--charcoal-700)" : "var(--charcoal-400)",
               fontSize: "13px",
+              fontFamily: "var(--font-zen)",
               outline: "none",
               cursor: hasAcceptedTOS ? "text" : "pointer",
+              transition: "border-color 0.2s ease-out, background-color 0.2s ease-out",
+            }}
+            onFocus={(e) => {
+              if (hasAcceptedTOS) {
+                e.currentTarget.style.borderColor = "var(--charcoal-400)";
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = "var(--charcoal-200)";
             }}
           />
         </form>
@@ -123,7 +137,8 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
           style={{
             position: "fixed",
             inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -132,27 +147,41 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
           onClick={() => setShowTOS(false)}
         >
           <div
+            className="sketch-border animate-fade-in"
             style={{
-              backgroundColor: "white",
-              padding: "24px",
-              borderRadius: "12px",
+              backgroundColor: "var(--matcha-cream)",
+              padding: "28px",
+              borderRadius: "1.5rem",
               maxWidth: "400px",
               margin: "16px",
+              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)",
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ margin: "0 0 16px", color: "#333", fontSize: "18px" }}>
+            <h3 style={{
+              margin: "0 0 20px",
+              color: "var(--charcoal-800)",
+              fontSize: "20px",
+              fontFamily: "var(--font-noto)",
+              fontWeight: 500,
+            }}>
               Chat Terms of Service
             </h3>
-            <div style={{ color: "#555", fontSize: "14px", lineHeight: "1.5", marginBottom: "20px" }}>
+            <div style={{
+              color: "var(--charcoal-600)",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              marginBottom: "24px",
+              fontFamily: "var(--font-zen)",
+            }}>
               <p style={{ margin: "0 0 12px" }}>By using the chat, you agree to:</p>
-              <ul style={{ margin: 0, paddingLeft: "20px" }}>
-                <li>Be respectful to other players</li>
-                <li>No harassment, hate speech, or bullying</li>
-                <li>No spam or inappropriate content</li>
+              <ul style={{ margin: 0, paddingLeft: "20px", color: "var(--charcoal-500)" }}>
+                <li style={{ marginBottom: "4px" }}>Be respectful to other players</li>
+                <li style={{ marginBottom: "4px" }}>No harassment, hate speech, or bullying</li>
+                <li style={{ marginBottom: "4px" }}>No spam or inappropriate content</li>
                 <li>No sharing of personal information</li>
               </ul>
-              <p style={{ margin: "12px 0 0", fontSize: "12px", color: "#888" }}>
+              <p style={{ margin: "16px 0 0", fontSize: "12px", color: "var(--charcoal-400)" }}>
                 Violation may result in being banned from chat.
               </p>
             </div>
@@ -161,13 +190,19 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
                 onClick={() => setShowTOS(false)}
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                  background: "white",
+                  padding: "12px 16px",
+                  borderRadius: "0.75rem",
+                  border: "1px solid var(--charcoal-300)",
+                  background: "transparent",
+                  color: "var(--charcoal-600)",
                   cursor: "pointer",
                   fontSize: "14px",
+                  fontFamily: "var(--font-zen)",
+                  fontWeight: 500,
+                  transition: "background-color 0.2s ease-out",
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--sage-50)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
                 Cancel
               </button>
@@ -175,15 +210,19 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
                 onClick={handleAcceptTOS}
                 style={{
                   flex: 1,
-                  padding: "10px",
-                  borderRadius: "6px",
+                  padding: "12px 16px",
+                  borderRadius: "0.75rem",
                   border: "none",
-                  background: "#4CAF50",
-                  color: "white",
+                  background: "var(--charcoal-700)",
+                  color: "var(--matcha-cream)",
                   cursor: "pointer",
-                  fontWeight: "bold",
+                  fontWeight: 500,
                   fontSize: "14px",
+                  fontFamily: "var(--font-zen)",
+                  transition: "background-color 0.2s ease-out",
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
               >
                 I Agree
               </button>
