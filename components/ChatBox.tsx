@@ -24,11 +24,6 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  useEffect(() => {
-    if (hasAcceptedTOS && showTOS === false) {
-      inputRef.current?.focus();
-    }
-  }, [hasAcceptedTOS, showTOS]);
 
   const handleAcceptTOS = () => {
     localStorage.setItem("chat-tos-accepted", "true");
