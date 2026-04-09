@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
-import { KeyboardControls } from "@react-three/drei";
+import { KeyboardControls, Html } from "@react-three/drei";
 import Player from "./Player";
 import Environment from "./Environment";
 import EmoteButtons from "./EmoteButtons";
@@ -11,10 +11,13 @@ import OtherPlayers from "./OtherPlayers";
 import { ChatBox } from "./ChatBox";
 import Minimap from "./Minimap";
 import GoldenRock from "./GoldenRock";
+import PinkRock from "./PinkRock";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
 const GOLDEN_ROCK_POSITION: [number, number, number] = [12, 0, 5];
+const PINK_ROCK_POSITION: [number, number, number] = [-15, 0, 10];
+const POND_POSITION: [number, number, number] = [-8, 0, -5];
 
 interface GameProps {
   username: string;
@@ -38,16 +41,53 @@ function Ground() {
   );
 }
 
-function Water() {
+interface WaterProps {
+  isNearby?: boolean;
+  activatedState?: "fish" | "no-rod" | null;
+}
+
+function Water({ isNearby = false, activatedState = null }: WaterProps) {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-8, 0.01, -5]}>
-      <circleGeometry args={[6, 32]} />
-      <meshStandardMaterial
-        color="#4FA4DE"
-        transparent
-        opacity={0.7}
-      />
-    </mesh>
+    <group position={[-8, 0, -5]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <circleGeometry args={[6, 32]} />
+        <meshStandardMaterial
+          color="#4FA4DE"
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+
+      {/* Interaction prompt */}
+      {isNearby && !activatedState && (
+        <Html position={[0, 1.5, 0]} center>
+          <div style={{
+            background: "rgba(250, 248, 240, 0.95)",
+            padding: "6px 12px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontFamily: "var(--font-zen)",
+            color: "var(--charcoal-700)",
+            whiteSpace: "nowrap",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          }}>
+            Press <strong>F</strong> to fish
+          </div>
+        </Html>
+      )}
+
+      {/* Result display */}
+      {activatedState && (
+        <Html position={[0, 1.5, 0]} center>
+          <div style={{
+            fontSize: "48px",
+            animation: "bounce 0.5s ease-out",
+          }}>
+            {activatedState === "fish" ? "🐟" : "❌"}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
 
@@ -79,6 +119,9 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [nameInput, setNameInput] = useState(username);
   const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
   const [goldenRockActivated, setGoldenRockActivated] = useState(false);
+  const [pinkRockActivated, setPinkRockActivated] = useState(false);
+  const [hasFishingRod, setHasFishingRod] = useState(false);
+  const [pondActivated, setPondActivated] = useState<"fish" | "no-rod" | null>(null);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
 
@@ -112,21 +155,48 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   );
   const isNearGoldenRock = distanceToGoldenRock < 4;
 
-  // Handle F key press for golden rock interaction
+  // Check if player is near the pink rock
+  const distanceToPinkRock = Math.sqrt(
+    Math.pow(localPosition[0] - PINK_ROCK_POSITION[0], 2) +
+    Math.pow(localPosition[2] - PINK_ROCK_POSITION[2], 2)
+  );
+  const isNearPinkRock = distanceToPinkRock < 4;
+
+  // Check if player is near the pond
+  const distanceToPond = Math.sqrt(
+    Math.pow(localPosition[0] - POND_POSITION[0], 2) +
+    Math.pow(localPosition[2] - POND_POSITION[2], 2)
+  );
+  const isNearPond = distanceToPond < 5;
+
+  // Handle F key press for interactions
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "KeyF" && isNearGoldenRock && !goldenRockActivated) {
+      if (e.code === "KeyF") {
         // Don't trigger if typing in an input
         if (document.activeElement instanceof HTMLInputElement) return;
-        setGoldenRockActivated(true);
-        // Reset after 2 seconds
-        setTimeout(() => setGoldenRockActivated(false), 2000);
+
+        if (isNearGoldenRock && !goldenRockActivated) {
+          setGoldenRockActivated(true);
+          setTimeout(() => setGoldenRockActivated(false), 2000);
+        }
+
+        if (isNearPinkRock && !pinkRockActivated) {
+          setPinkRockActivated(true);
+          setHasFishingRod(true);
+          setTimeout(() => setPinkRockActivated(false), 2000);
+        }
+
+        if (isNearPond && !pondActivated) {
+          setPondActivated(hasFishingRod ? "fish" : "no-rod");
+          setTimeout(() => setPondActivated(null), 2000);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isNearGoldenRock, goldenRockActivated]);
+  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -178,12 +248,17 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <color attach="background" args={["#87CEEB"]} />
         <Lights />
         <Ground />
-        <Water />
+        <Water isNearby={isNearPond} activatedState={pondActivated} />
         <Environment />
         <GoldenRock
           position={GOLDEN_ROCK_POSITION}
           isNearby={isNearGoldenRock}
           isActivated={goldenRockActivated}
+        />
+        <PinkRock
+          position={PINK_ROCK_POSITION}
+          isNearby={isNearPinkRock}
+          isActivated={pinkRockActivated}
         />
         <Player
           username={username}
@@ -263,6 +338,71 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           }}
         >
           Interact
+        </button>
+      )}
+
+      {/* Mobile interact button for pink rock */}
+      {isNearPinkRock && !pinkRockActivated && (
+        <button
+          onClick={() => {
+            setPinkRockActivated(true);
+            setHasFishingRod(true);
+            setTimeout(() => setPinkRockActivated(false), 2000);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 100,
+            right: 20,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(255, 105, 180, 0.9)",
+            border: "3px solid #FF85C1",
+            color: "var(--charcoal-700)",
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          Interact
+        </button>
+      )}
+
+      {/* Mobile interact button for pond */}
+      {isNearPond && !pondActivated && (
+        <button
+          onClick={() => {
+            setPondActivated(hasFishingRod ? "fish" : "no-rod");
+            setTimeout(() => setPondActivated(null), 2000);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 100,
+            right: 20,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(79, 164, 222, 0.9)",
+            border: "3px solid #6BB8E8",
+            color: "white",
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          Fish
         </button>
       )}
 
