@@ -135,27 +135,33 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
 
     const { forward, backward, left, right } = getKeys();
 
-    // Calculate movement direction from keyboard
-    let dirX = 0;
-    let dirZ = 0;
-    if (forward) dirZ -= 1;
-    if (backward) dirZ += 1;
-    if (left) dirX -= 1;
-    if (right) dirX += 1;
+    // Calculate movement direction from keyboard (in local/input space)
+    let inputX = 0;
+    let inputZ = 0;
+    if (forward) inputZ -= 1;
+    if (backward) inputZ += 1;
+    if (left) inputX -= 1;
+    if (right) inputX += 1;
 
     // Add mobile joystick input (with dead zone)
     const mobileX = Math.abs(mobileInput.x) > 0.15 ? mobileInput.x : 0;
     const mobileZ = Math.abs(mobileInput.z) > 0.15 ? mobileInput.z : 0;
-    dirX += mobileX;
-    dirZ += mobileZ;
+    inputX += mobileX;
+    inputZ += mobileZ;
 
-    // Normalize
-    const length = Math.sqrt(dirX * dirX + dirZ * dirZ);
+    // Normalize input
+    const length = Math.sqrt(inputX * inputX + inputZ * inputZ);
     const isMoving = length > 0.15;
 
     if (isMoving) {
-      dirX /= length;
-      dirZ /= length;
+      inputX /= length;
+      inputZ /= length;
+
+      // Transform movement direction based on camera angle
+      const cos = Math.cos(cameraAngle.current);
+      const sin = Math.sin(cameraAngle.current);
+      const dirX = inputX * cos - inputZ * sin;
+      const dirZ = inputX * sin + inputZ * cos;
 
       // Rotate capybara to face movement direction
       const angle = Math.atan2(dirX, dirZ);
