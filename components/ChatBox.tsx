@@ -10,7 +10,6 @@ type ChatBoxProps = {
 
 export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
   const [input, setInput] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const [hasAcceptedTOS, setHasAcceptedTOS] = useState(false);
   const [showTOS, setShowTOS] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,10 +25,10 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
   }, [messages]);
 
   useEffect(() => {
-    if (isOpen && hasAcceptedTOS) {
+    if (hasAcceptedTOS && showTOS === false) {
       inputRef.current?.focus();
     }
-  }, [isOpen, hasAcceptedTOS]);
+  }, [hasAcceptedTOS, showTOS]);
 
   const handleAcceptTOS = () => {
     localStorage.setItem("chat-tos-accepted", "true");
@@ -37,26 +36,17 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
     setShowTOS(false);
   };
 
-  const handleOpenChat = () => {
-    if (hasAcceptedTOS) {
-      setIsOpen(true);
-    } else {
+  const handleInputClick = () => {
+    if (!hasAcceptedTOS) {
       setShowTOS(true);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (input.trim()) {
+    if (hasAcceptedTOS && input.trim()) {
       onSendMessage(input);
       setInput("");
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      setIsOpen(false);
-      inputRef.current?.blur();
     }
   };
 
@@ -70,78 +60,63 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
         zIndex: 1000,
       }}
     >
-      {isOpen ? (
+      <div
+        style={{
+          background: "rgba(0, 0, 0, 0.7)",
+          borderRadius: "8px",
+          overflow: "hidden",
+        }}
+      >
         <div
           style={{
-            background: "rgba(0, 0, 0, 0.7)",
-            borderRadius: "8px",
-            overflow: "hidden",
+            height: "120px",
+            overflowY: "auto",
+            padding: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
           }}
         >
-          <div
-            style={{
-              height: "150px",
-              overflowY: "auto",
-              padding: "8px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "4px",
-            }}
-          >
-            {messages.length === 0 ? (
-              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
-                No messages yet...
+          {messages.length === 0 ? (
+            <div style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+              No messages yet...
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div key={msg.id} style={{ fontSize: "13px" }}>
+                <span style={{ color: "#7dd3fc", fontWeight: "bold" }}>
+                  {msg.name}:
+                </span>{" "}
+                <span style={{ color: "white" }}>{msg.text}</span>
               </div>
-            ) : (
-              messages.map((msg) => (
-                <div key={msg.id} style={{ fontSize: "13px" }}>
-                  <span style={{ color: "#7dd3fc", fontWeight: "bold" }}>
-                    {msg.name}:
-                  </span>{" "}
-                  <span style={{ color: "white" }}>{msg.text}</span>
-                </div>
-              ))
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-          <form onSubmit={handleSubmit} style={{ padding: "8px" }}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Type a message..."
-              maxLength={200}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "4px",
-                border: "none",
-                background: "rgba(255, 255, 255, 0.1)",
-                color: "white",
-                fontSize: "13px",
-                outline: "none",
-              }}
-            />
-          </form>
+            ))
+          )}
+          <div ref={messagesEndRef} />
         </div>
-      ) : (
-        <button
-          onClick={handleOpenChat}
-          style={{
-            background: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            border: "none",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "13px",
-          }}
-        >
-          Chat {messages.length > 0 && `(${messages.length})`}
-        </button>
-      )}
+        <form onSubmit={handleSubmit} style={{ padding: "8px" }}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => hasAcceptedTOS && setInput(e.target.value)}
+            onClick={handleInputClick}
+            placeholder={hasAcceptedTOS ? "Type a message..." : "Accept terms to chat..."}
+            maxLength={200}
+            readOnly={!hasAcceptedTOS}
+            style={{
+              width: "100%",
+              padding: "8px",
+              borderRadius: "4px",
+              border: "none",
+              background: hasAcceptedTOS ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)",
+              color: hasAcceptedTOS ? "white" : "rgba(255, 255, 255, 0.4)",
+              fontSize: "13px",
+              outline: "none",
+              cursor: hasAcceptedTOS ? "text" : "pointer",
+            }}
+          />
+        </form>
+      </div>
 
       {showTOS && (
         <div
