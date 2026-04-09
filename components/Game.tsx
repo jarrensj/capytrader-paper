@@ -150,6 +150,45 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         />
         <OtherPlayers players={otherPlayers} />
       </Canvas>
+
+      {/* Loading overlay while connecting */}
+      {!connected && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(250, 248, 240, 0.9)",
+            backdropFilter: "blur(8px)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            gap: 16,
+          }}
+        >
+          <div
+            style={{
+              width: 40,
+              height: 40,
+              border: "3px solid var(--charcoal-200)",
+              borderTopColor: "var(--sage-500)",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <div
+            style={{
+              fontFamily: "var(--font-zen)",
+              fontSize: 16,
+              color: "var(--charcoal-600)",
+            }}
+          >
+            Connecting...
+          </div>
+        </div>
+      )}
+
       <MobileControls onMove={handleMobileMove} />
       <ChatBox messages={messages} onSendMessage={sendMessage} />
       <Minimap
