@@ -63,7 +63,7 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
     <div
       style={{
         position: "fixed",
-        bottom: "100px",
+        bottom: "20px",
         left: "16px",
         width: "320px",
         zIndex: 1000,
