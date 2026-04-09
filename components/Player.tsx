@@ -9,6 +9,8 @@ import NameTag from "./NameTag";
 import { EmoteType } from "@/hooks/useEmotes";
 
 const MOVE_SPEED = 5;
+const JUMP_FORCE = 8;
+const GRAVITY = 20;
 const MIN_CAMERA_DISTANCE = 5;
 const MAX_CAMERA_DISTANCE = 25;
 const DEFAULT_CAMERA_DISTANCE = 12;
@@ -30,6 +32,8 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
   const groupRef = useRef<Group>(null);
   const [, getKeys] = useKeyboardControls();
   const velocity = useRef(new Vector3());
+  const verticalVelocity = useRef(0);
+  const isGrounded = useRef(true);
   const { camera, gl } = useThree();
 
   // Camera orbit state
@@ -134,7 +138,7 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
-    const { forward, backward, left, right } = getKeys();
+    const { forward, backward, left, right, jump } = getKeys();
 
     // Calculate movement direction from keyboard (in local/input space)
     let inputX = 0;
@@ -185,6 +189,23 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     if (Math.abs(velocity.current.x) > 0.01 || Math.abs(velocity.current.z) > 0.01) {
       groupRef.current.position.x += velocity.current.x * delta;
       groupRef.current.position.z += velocity.current.z * delta;
+    }
+
+    // Jump logic
+    if (jump && isGrounded.current) {
+      verticalVelocity.current = JUMP_FORCE;
+      isGrounded.current = false;
+    }
+
+    // Apply gravity
+    verticalVelocity.current -= GRAVITY * delta;
+    groupRef.current.position.y += verticalVelocity.current * delta;
+
+    // Ground check
+    if (groupRef.current.position.y <= 0) {
+      groupRef.current.position.y = 0;
+      verticalVelocity.current = 0;
+      isGrounded.current = true;
     }
 
     // Smooth camera orbit interpolation
