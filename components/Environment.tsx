@@ -20,14 +20,25 @@ const trees: { position: [number, number, number]; scale: number }[] = [
 ];
 
 const boulders: { position: [number, number, number]; scale: number; variant: number }[] = [
-  { position: [4, 0, 3], scale: 1.2, variant: 0 },
-  { position: [-6, 0, -3], scale: 1.5, variant: 1 },
-  { position: [9, 0, -10], scale: 1.0, variant: 2 },
-  { position: [-12, 0, 7], scale: 1.3, variant: 3 },
-  { position: [14, 0, 8], scale: 0.9, variant: 0 },
-  { position: [-4, 0, -12], scale: 1.4, variant: 1 },
-  { position: [2, 0, 10], scale: 1.1, variant: 2 },
-  { position: [-14, 0, -8], scale: 1.6, variant: 3 },
+  // Tiny rocks
+  { position: [3, 0, 2], scale: 0.4, variant: 0 },
+  { position: [-2, 0, 5], scale: 0.3, variant: 1 },
+  { position: [6, 0, -4], scale: 0.5, variant: 2 },
+  // Small rocks
+  { position: [4, 0, 8], scale: 0.8, variant: 3 },
+  { position: [-7, 0, -2], scale: 0.7, variant: 0 },
+  { position: [11, 0, 3], scale: 0.9, variant: 1 },
+  // Medium rocks
+  { position: [-10, 0, 6], scale: 1.3, variant: 2 },
+  { position: [8, 0, -9], scale: 1.5, variant: 3 },
+  { position: [-5, 0, -11], scale: 1.2, variant: 0 },
+  // Large rocks
+  { position: [15, 0, -4], scale: 2.2, variant: 1 },
+  { position: [-14, 0, 10], scale: 2.5, variant: 2 },
+  // HUGE rocks
+  { position: [20, 0, 12], scale: 4.0, variant: 3 },
+  { position: [-18, 0, -14], scale: 3.5, variant: 0 },
+  { position: [-25, 0, 5], scale: 5.0, variant: 1 },
 ];
 
 export default function Environment() {
