@@ -71,11 +71,11 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
     >
       <div
         style={{
-          background: "rgba(250, 248, 240, 0.95)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(250, 248, 240, 0.75)",
+          backdropFilter: "blur(12px)",
           borderRadius: "1rem",
           overflow: "hidden",
-          border: "1px solid var(--charcoal-200)",
+          border: "1px solid rgba(209, 209, 209, 0.5)",
           boxShadow: "0 2px 12px rgba(0, 0, 0, 0.08)",
         }}
       >
