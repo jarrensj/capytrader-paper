@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CapyWorld",
+  title: "becapy",
   description: "A peaceful capybara hangout",
 };
 
