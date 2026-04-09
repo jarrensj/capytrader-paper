@@ -33,49 +33,51 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     const { forward, backward, left, right } = getKeys();
 
     // Calculate movement direction from keyboard
-    const direction = new Vector3();
-    if (forward) direction.z -= 1;
-    if (backward) direction.z += 1;
-    if (left) direction.x -= 1;
-    if (right) direction.x += 1;
+    let dirX = 0;
+    let dirZ = 0;
+    if (forward) dirZ -= 1;
+    if (backward) dirZ += 1;
+    if (left) dirX -= 1;
+    if (right) dirX += 1;
 
     // Add mobile joystick input
-    direction.x += mobileInput.x;
-    direction.z += mobileInput.z;
+    dirX += mobileInput.x;
+    dirZ += mobileInput.z;
 
-    // Normalize and apply speed
-    if (direction.length() > 0.1) {
-      direction.normalize();
+    // Normalize
+    const length = Math.sqrt(dirX * dirX + dirZ * dirZ);
+    const isMoving = length > 0.1;
+
+    if (isMoving) {
+      dirX /= length;
+      dirZ /= length;
 
       // Rotate capybara to face movement direction
-      const angle = Math.atan2(direction.x, direction.z);
+      const angle = Math.atan2(dirX, dirZ);
       groupRef.current.rotation.y = angle;
 
-      velocity.current.lerp(direction.multiplyScalar(MOVE_SPEED), 0.2);
+      // Set velocity directly
+      velocity.current.x = dirX * MOVE_SPEED;
+      velocity.current.z = dirZ * MOVE_SPEED;
 
       // Clear emote when moving
       if (emote !== "none") {
         onClearEmote();
       }
     } else {
-      // Slow down when no input
-      velocity.current.lerp(new Vector3(0, 0, 0), 0.1);
+      // Stop immediately when no input
+      velocity.current.x = 0;
+      velocity.current.z = 0;
     }
 
     // Apply movement
     groupRef.current.position.x += velocity.current.x * delta;
     groupRef.current.position.z += velocity.current.z * delta;
 
-    // Boundary limits - soft push back
+    // Boundary limits - clamp position
     const pos = groupRef.current.position;
-    if (Math.abs(pos.x) > BOUNDARY_LIMIT) {
-      pos.x = Math.sign(pos.x) * BOUNDARY_LIMIT;
-      velocity.current.x *= -0.5;
-    }
-    if (Math.abs(pos.z) > BOUNDARY_LIMIT) {
-      pos.z = Math.sign(pos.z) * BOUNDARY_LIMIT;
-      velocity.current.z *= -0.5;
-    }
+    pos.x = Math.max(-BOUNDARY_LIMIT, Math.min(BOUNDARY_LIMIT, pos.x));
+    pos.z = Math.max(-BOUNDARY_LIMIT, Math.min(BOUNDARY_LIMIT, pos.z));
 
     // Third-person camera follow
     const playerPosition = groupRef.current.position;
