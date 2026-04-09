@@ -300,6 +300,24 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         />
         {connected ? `${otherPlayers.length + 1} online` : "Connecting..."}
       </div>
+      <div
+        style={{
+          position: "fixed",
+          top: 200,
+          left: 16,
+          padding: "4px 10px",
+          borderRadius: "0.5rem",
+          backgroundColor: "var(--sage-500)",
+          color: "var(--matcha-cream)",
+          fontSize: 10,
+          fontWeight: 600,
+          fontFamily: "var(--font-zen)",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+        }}
+      >
+        Beta
+      </div>
       <button
         onClick={() => setShowSettings(true)}
         style={{
