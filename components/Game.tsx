@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import { KeyboardControls } from "@react-three/drei";
 import Player from "./Player";
@@ -10,8 +10,11 @@ import MobileControls from "./MobileControls";
 import OtherPlayers from "./OtherPlayers";
 import { ChatBox } from "./ChatBox";
 import Minimap from "./Minimap";
+import GoldenRock from "./GoldenRock";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
+
+const GOLDEN_ROCK_POSITION: [number, number, number] = [12, 0, 5];
 
 interface GameProps {
   username: string;
@@ -73,7 +76,31 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [nameInput, setNameInput] = useState(username);
   const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
+  const [goldenRockActivated, setGoldenRockActivated] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
+
+  // Check if player is near the golden rock
+  const distanceToGoldenRock = Math.sqrt(
+    Math.pow(localPosition[0] - GOLDEN_ROCK_POSITION[0], 2) +
+    Math.pow(localPosition[2] - GOLDEN_ROCK_POSITION[2], 2)
+  );
+  const isNearGoldenRock = distanceToGoldenRock < 4;
+
+  // Handle F key press for golden rock interaction
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "KeyF" && isNearGoldenRock && !goldenRockActivated) {
+        // Don't trigger if typing in an input
+        if (document.activeElement instanceof HTMLInputElement) return;
+        setGoldenRockActivated(true);
+        // Reset after 2 seconds
+        setTimeout(() => setGoldenRockActivated(false), 2000);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isNearGoldenRock, goldenRockActivated]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -109,6 +136,11 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <Ground />
         <Water />
         <Environment />
+        <GoldenRock
+          position={GOLDEN_ROCK_POSITION}
+          isNearby={isNearGoldenRock}
+          isActivated={goldenRockActivated}
+        />
         <Player
           username={username}
           emote={currentEmote}
