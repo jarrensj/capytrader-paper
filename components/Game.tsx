@@ -8,6 +8,7 @@ import Environment from "./Environment";
 import EmoteButtons from "./EmoteButtons";
 import MobileControls from "./MobileControls";
 import OtherPlayers from "./OtherPlayers";
+import { ChatBox } from "./ChatBox";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -70,7 +71,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [mobileInput, setMobileInput] = useState({ x: 0, z: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [nameInput, setNameInput] = useState(username);
-  const { otherPlayers, connected, updatePosition } = useMultiplayer(username);
+  const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -106,6 +107,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       </Canvas>
       <EmoteButtons onEmote={(emote) => triggerEmote(emote as EmoteType)} />
       <MobileControls onMove={handleMobileMove} />
+      <ChatBox messages={messages} onSendMessage={sendMessage} />
       <div
         style={{
           position: "fixed",
