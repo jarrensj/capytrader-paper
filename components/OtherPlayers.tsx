@@ -4,15 +4,16 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Group, Vector3 } from "three";
 import { Html } from "@react-three/drei";
-import { PlayerState } from "@/hooks/useMultiplayer";
+import { PlayerState, ChatMessage } from "@/hooks/useMultiplayer";
 
 const LERP_FACTOR = 0.15;
 
 interface OtherPlayerProps {
   player: PlayerState;
+  chatMessage?: string;
 }
 
-function OtherPlayer({ player }: OtherPlayerProps) {
+function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
   const groupRef = useRef<Group>(null);
   const targetPosition = useRef(new Vector3(...player.position));
 
@@ -41,6 +42,29 @@ function OtherPlayer({ player }: OtherPlayerProps) {
       >
         capy
       </Html>
+      {chatMessage && (
+        <Html
+          position={[0, 2.3, 0]}
+          center
+          style={{
+            color: "var(--charcoal-700)",
+            backgroundColor: "rgba(250, 248, 240, 0.95)",
+            padding: "8px 12px",
+            borderRadius: "12px",
+            fontSize: "13px",
+            fontFamily: "var(--font-zen)",
+            whiteSpace: "nowrap",
+            maxWidth: "200px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            userSelect: "none",
+            pointerEvents: "none",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+          }}
+        >
+          {chatMessage}
+        </Html>
+      )}
       <Html
         position={[0, 1.5, 0]}
         center
@@ -64,13 +88,18 @@ function OtherPlayer({ player }: OtherPlayerProps) {
 
 interface OtherPlayersProps {
   players: PlayerState[];
+  recentMessages: Map<string, string>;
 }
 
-export default function OtherPlayers({ players }: OtherPlayersProps) {
+export default function OtherPlayers({ players, recentMessages }: OtherPlayersProps) {
   return (
     <>
       {players.map((player) => (
-        <OtherPlayer key={player.id} player={player} />
+        <OtherPlayer
+          key={player.id}
+          player={player}
+          chatMessage={recentMessages.get(player.name)}
+        />
       ))}
     </>
   );

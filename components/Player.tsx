@@ -23,9 +23,10 @@ interface PlayerProps {
   onClearEmote: () => void;
   mobileInput?: { x: number; z: number };
   onPositionUpdate?: (position: [number, number, number], rotation: number) => void;
+  chatMessage?: string;
 }
 
-export default function Player({ username, emote, onClearEmote, mobileInput = { x: 0, z: 0 }, onPositionUpdate }: PlayerProps) {
+export default function Player({ username, emote, onClearEmote, mobileInput = { x: 0, z: 0 }, onPositionUpdate, chatMessage }: PlayerProps) {
   const groupRef = useRef<Group>(null);
   const [, getKeys] = useKeyboardControls();
   const velocity = useRef(new Vector3());
@@ -220,7 +221,7 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
   return (
     <group ref={groupRef} position={[0, 0, 0]}>
       <Capybara emote={emote} />
-      <NameTag name={username} />
+      <NameTag name={username} chatMessage={chatMessage} />
     </group>
   );
 }

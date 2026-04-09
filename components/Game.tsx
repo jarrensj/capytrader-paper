@@ -77,7 +77,31 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [nameInput, setNameInput] = useState(username);
   const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
   const [goldenRockActivated, setGoldenRockActivated] = useState(false);
+  const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
+
+  // Track recent messages for chat bubbles (show for 4 seconds)
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const latestMessage = messages[messages.length - 1];
+
+    setRecentMessages(prev => {
+      const next = new Map(prev);
+      next.set(latestMessage.name, latestMessage.text);
+      return next;
+    });
+
+    // Clear message after 4 seconds
+    const timeout = setTimeout(() => {
+      setRecentMessages(prev => {
+        const next = new Map(prev);
+        next.delete(latestMessage.name);
+        return next;
+      });
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [messages]);
 
   // Check if player is near the golden rock
   const distanceToGoldenRock = Math.sqrt(
@@ -147,8 +171,9 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           onClearEmote={clearEmote}
           mobileInput={mobileInput}
           onPositionUpdate={handlePositionUpdate}
+          chatMessage={recentMessages.get(username)}
         />
-        <OtherPlayers players={otherPlayers} />
+        <OtherPlayers players={otherPlayers} recentMessages={recentMessages} />
       </Canvas>
 
       {/* Loading overlay while connecting */}
