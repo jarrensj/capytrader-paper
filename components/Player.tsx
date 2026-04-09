@@ -67,7 +67,7 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       const deltaX = e.clientX - lastMouse.current.x;
       const deltaY = e.clientY - lastMouse.current.y;
 
-      targetAngle.current -= deltaX * MOUSE_SENSITIVITY;
+      targetAngle.current += deltaX * MOUSE_SENSITIVITY;
       targetPitch.current = Math.max(0.05, Math.min(1.4, targetPitch.current + deltaY * MOUSE_SENSITIVITY));
 
       lastMouse.current = { x: e.clientX, y: e.clientY };
@@ -108,7 +108,7 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       const deltaX = touch.clientX - lastMouse.current.x;
       const deltaY = touch.clientY - lastMouse.current.y;
 
-      targetAngle.current -= deltaX * TOUCH_SENSITIVITY;
+      targetAngle.current += deltaX * TOUCH_SENSITIVITY;
       targetPitch.current = Math.max(0.05, Math.min(1.4, targetPitch.current + deltaY * TOUCH_SENSITIVITY));
 
       lastMouse.current = { x: touch.clientX, y: touch.clientY };
