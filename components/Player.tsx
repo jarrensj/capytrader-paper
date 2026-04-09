@@ -9,10 +9,13 @@ import NameTag from "./NameTag";
 import { EmoteType } from "@/hooks/useEmotes";
 
 const MOVE_SPEED = 5;
-const CAMERA_DISTANCE = 10;
-const CAMERA_HEIGHT = 5;
-const CAMERA_LERP_FACTOR = 0.05;
-const MOUSE_SENSITIVITY = 0.003;
+const MIN_CAMERA_DISTANCE = 5;
+const MAX_CAMERA_DISTANCE = 25;
+const DEFAULT_CAMERA_DISTANCE = 12;
+const CAMERA_HEIGHT_OFFSET = 2;
+const CAMERA_LERP_FACTOR = 0.08;
+const MOUSE_SENSITIVITY = 0.005;
+const TOUCH_SENSITIVITY = 0.008;
 
 interface PlayerProps {
   username: string;
@@ -28,9 +31,13 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
   const velocity = useRef(new Vector3());
   const { camera, gl } = useThree();
 
-  // Camera orbit angles
-  const cameraAngle = useRef(0); // horizontal rotation
-  const cameraPitch = useRef(0.3); // vertical angle (radians)
+  // Camera orbit state
+  const cameraAngle = useRef(0); // horizontal rotation (radians)
+  const cameraPitch = useRef(0.4); // vertical angle (radians, 0 = horizontal, higher = looking down)
+  const cameraDistance = useRef(DEFAULT_CAMERA_DISTANCE);
+  const targetAngle = useRef(0);
+  const targetPitch = useRef(0.4);
+  const targetDistance = useRef(DEFAULT_CAMERA_DISTANCE);
   const isDragging = useRef(false);
   const lastMouse = useRef({ x: 0, y: 0 });
 
@@ -38,8 +45,11 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     const canvas = gl.domElement;
 
     const handleMouseDown = (e: MouseEvent) => {
-      isDragging.current = true;
-      lastMouse.current = { x: e.clientX, y: e.clientY };
+      // Left click or right click to rotate camera
+      if (e.button === 0 || e.button === 2) {
+        isDragging.current = true;
+        lastMouse.current = { x: e.clientX, y: e.clientY };
+      }
     };
 
     const handleMouseUp = () => {
@@ -52,17 +62,30 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       const deltaX = e.clientX - lastMouse.current.x;
       const deltaY = e.clientY - lastMouse.current.y;
 
-      cameraAngle.current -= deltaX * MOUSE_SENSITIVITY;
-      cameraPitch.current = Math.max(0.1, Math.min(1.2, cameraPitch.current + deltaY * MOUSE_SENSITIVITY));
+      targetAngle.current -= deltaX * MOUSE_SENSITIVITY;
+      targetPitch.current = Math.max(0.05, Math.min(1.4, targetPitch.current + deltaY * MOUSE_SENSITIVITY));
 
       lastMouse.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomSpeed = 0.002;
+      targetDistance.current = Math.max(
+        MIN_CAMERA_DISTANCE,
+        Math.min(MAX_CAMERA_DISTANCE, targetDistance.current + e.deltaY * zoomSpeed * targetDistance.current)
+      );
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault(); // Prevent right-click menu
     };
 
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0];
         // Only start camera drag if touch is in the right half of screen
-        if (touch.clientX > window.innerWidth / 2) {
+        if (touch.clientX > window.innerWidth * 0.4) {
           isDragging.current = true;
           lastMouse.current = { x: touch.clientX, y: touch.clientY };
         }
@@ -80,13 +103,15 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       const deltaX = touch.clientX - lastMouse.current.x;
       const deltaY = touch.clientY - lastMouse.current.y;
 
-      cameraAngle.current -= deltaX * MOUSE_SENSITIVITY;
-      cameraPitch.current = Math.max(0.1, Math.min(1.2, cameraPitch.current + deltaY * MOUSE_SENSITIVITY));
+      targetAngle.current -= deltaX * TOUCH_SENSITIVITY;
+      targetPitch.current = Math.max(0.05, Math.min(1.4, targetPitch.current + deltaY * TOUCH_SENSITIVITY));
 
       lastMouse.current = { x: touch.clientX, y: touch.clientY };
     };
 
     canvas.addEventListener("mousedown", handleMouseDown);
+    canvas.addEventListener("contextmenu", handleContextMenu);
+    canvas.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("mousemove", handleMouseMove);
     canvas.addEventListener("touchstart", handleTouchStart);
@@ -95,6 +120,8 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
 
     return () => {
       canvas.removeEventListener("mousedown", handleMouseDown);
+      canvas.removeEventListener("contextmenu", handleContextMenu);
+      canvas.removeEventListener("wheel", handleWheel);
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("mousemove", handleMouseMove);
       canvas.removeEventListener("touchstart", handleTouchStart);
@@ -153,12 +180,17 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
       groupRef.current.position.z += velocity.current.z * delta;
     }
 
+    // Smooth camera orbit interpolation
+    cameraAngle.current += (targetAngle.current - cameraAngle.current) * 0.15;
+    cameraPitch.current += (targetPitch.current - cameraPitch.current) * 0.15;
+    cameraDistance.current += (targetDistance.current - cameraDistance.current) * 0.1;
+
     // Third-person camera follow with orbit
     const playerPosition = groupRef.current.position;
 
     // Calculate camera position based on orbit angles
-    const horizontalDist = CAMERA_DISTANCE * Math.cos(cameraPitch.current);
-    const verticalDist = CAMERA_DISTANCE * Math.sin(cameraPitch.current) + CAMERA_HEIGHT;
+    const horizontalDist = cameraDistance.current * Math.cos(cameraPitch.current);
+    const verticalDist = cameraDistance.current * Math.sin(cameraPitch.current) + CAMERA_HEIGHT_OFFSET;
 
     const targetCameraPosition = new Vector3(
       playerPosition.x + Math.sin(cameraAngle.current) * horizontalDist,
