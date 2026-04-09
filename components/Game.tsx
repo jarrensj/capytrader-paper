@@ -28,7 +28,7 @@ function Ground() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
       <planeGeometry args={[2000, 2000]} />
-      <meshStandardMaterial color="#90EE90" />
+      <meshStandardMaterial color="#B8C5A4" />
     </mesh>
   );
 }
@@ -38,9 +38,9 @@ function Water() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-8, 0.01, -5]}>
       <circleGeometry args={[6, 32]} />
       <meshStandardMaterial
-        color="#4FA4DE"
+        color="#A8C4B8"
         transparent
-        opacity={0.7}
+        opacity={0.75}
       />
     </mesh>
   );
@@ -91,7 +91,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         camera={{ position: [0, 5, 10], fov: 50 }}
         shadows
       >
-        <color attach="background" args={["#87CEEB"]} />
+        <color attach="background" args={["#E9EDE1"]} />
         <Lights />
         <Ground />
         <Water />

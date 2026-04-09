@@ -6,8 +6,8 @@ interface TreeProps {
 }
 
 export default function Tree({ position = [0, 0, 0], scale = 1 }: TreeProps) {
-  const trunkColor = "#8B4513";
-  const leavesColor = "#228B22";
+  const trunkColor = "#8B7355";
+  const leavesColor = "#7D9560";
 
   return (
     <group position={position} scale={scale}>
