@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import { KeyboardControls } from "@react-three/drei";
 import Player from "./Player";
@@ -9,6 +9,7 @@ import EmoteButtons from "./EmoteButtons";
 import MobileControls from "./MobileControls";
 import OtherPlayers from "./OtherPlayers";
 import { ChatBox } from "./ChatBox";
+import Minimap from "./Minimap";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -71,11 +72,17 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [mobileInput, setMobileInput] = useState({ x: 0, z: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const [nameInput, setNameInput] = useState(username);
+  const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
   }, []);
+
+  const handlePositionUpdate = useCallback((position: [number, number, number], rotation: number) => {
+    setLocalPosition(position);
+    updatePosition(position, rotation);
+  }, [updatePosition]);
 
   const handleSaveName = () => {
     if (nameInput.trim() && onUsernameChange) {
@@ -101,41 +108,45 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           emote={currentEmote}
           onClearEmote={clearEmote}
           mobileInput={mobileInput}
-          onPositionUpdate={updatePosition}
+          onPositionUpdate={handlePositionUpdate}
         />
         <OtherPlayers players={otherPlayers} />
       </Canvas>
       <EmoteButtons onEmote={(emote) => triggerEmote(emote as EmoteType)} />
       <MobileControls onMove={handleMobileMove} />
       <ChatBox messages={messages} onSendMessage={sendMessage} />
+      <Minimap
+        localPlayer={{ name: username, position: localPosition }}
+        otherPlayers={otherPlayers}
+      />
       <div
         style={{
           position: "fixed",
-          top: 16,
+          top: 164,
           left: 16,
-          padding: "8px 16px",
-          borderRadius: "1rem",
+          padding: "6px 12px",
+          borderRadius: "0.75rem",
           backgroundColor: "rgba(250, 248, 240, 0.95)",
           backdropFilter: "blur(8px)",
           color: "var(--charcoal-700)",
-          fontSize: 13,
+          fontSize: 11,
           fontWeight: 500,
           fontFamily: "var(--font-zen)",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 6,
         }}
       >
         <span
           style={{
-            width: 8,
-            height: 8,
+            width: 6,
+            height: 6,
             borderRadius: "50%",
             backgroundColor: connected ? "var(--sage-500)" : "var(--charcoal-400)",
           }}
         />
-        {connected ? `Online (${otherPlayers.length + 1})` : "Connecting..."}
+        {connected ? `${otherPlayers.length + 1} online` : "Connecting..."}
       </div>
       <button
         onClick={() => setShowSettings(true)}
