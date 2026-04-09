@@ -47,6 +47,20 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
     if (hasAcceptedTOS && input.trim()) {
       onSendMessage(input);
       setInput("");
+      inputRef.current?.blur();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Prevent movement keys from being captured while typing
+    const movementKeys = ["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (movementKeys.includes(e.code)) {
+      e.stopPropagation();
+    }
+    // Escape to blur input and return to game
+    if (e.key === "Escape") {
+      e.preventDefault();
+      inputRef.current?.blur();
     }
   };
 
@@ -104,6 +118,7 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
             value={input}
             onChange={(e) => hasAcceptedTOS && setInput(e.target.value)}
             onClick={handleInputClick}
+            onKeyDown={handleKeyDown}
             placeholder={hasAcceptedTOS ? "Type a message..." : "Accept terms to chat..."}
             maxLength={200}
             readOnly={!hasAcceptedTOS}

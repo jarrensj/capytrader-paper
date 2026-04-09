@@ -97,6 +97,12 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         style={{ width: "100vw", height: "100vh" }}
         camera={{ position: [0, 5, 10], fov: 50 }}
         shadows
+        onPointerDown={() => {
+          // Blur any focused input when clicking on canvas
+          if (document.activeElement instanceof HTMLInputElement) {
+            document.activeElement.blur();
+          }
+        }}
       >
         <color attach="background" args={["#87CEEB"]} />
         <Lights />
