@@ -189,6 +189,38 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         </div>
       )}
 
+      {/* Mobile interact button for golden rock */}
+      {isNearGoldenRock && !goldenRockActivated && (
+        <button
+          onClick={() => {
+            setGoldenRockActivated(true);
+            setTimeout(() => setGoldenRockActivated(false), 2000);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 100,
+            right: 20,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(255, 215, 0, 0.9)",
+            border: "3px solid #FFC125",
+            color: "var(--charcoal-700)",
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          Interact
+        </button>
+      )}
+
       <MobileControls onMove={handleMobileMove} />
       <ChatBox messages={messages} onSendMessage={sendMessage} />
       <Minimap
