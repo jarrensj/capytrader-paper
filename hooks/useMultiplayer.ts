@@ -11,9 +11,17 @@ export type PlayerState = {
   rotation: number;
 };
 
+export type ChatMessage = {
+  id: string;
+  name: string;
+  text: string;
+  timestamp: number;
+};
+
 export function useMultiplayer(username: string) {
   const [otherPlayers, setOtherPlayers] = useState<Map<string, PlayerState>>(new Map());
   const [connected, setConnected] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [playerId] = useState(() => crypto.randomUUID());
   const lastUpdateRef = useRef<number>(0);
@@ -40,6 +48,9 @@ export function useMultiplayer(username: string) {
           next.delete(payload.id);
           return next;
         });
+      })
+      .on("broadcast", { event: "chat-message" }, ({ payload }) => {
+        setMessages((prev) => [...prev.slice(-49), payload as ChatMessage]);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -113,10 +124,34 @@ export function useMultiplayer(username: string) {
     [username, playerId]
   );
 
+  const sendMessage = useCallback(
+    (text: string) => {
+      if (!text.trim() || !channelRef.current) return;
+
+      const message: ChatMessage = {
+        id: crypto.randomUUID(),
+        name: username,
+        text: text.trim(),
+        timestamp: Date.now(),
+      };
+
+      channelRef.current.send({
+        type: "broadcast",
+        event: "chat-message",
+        payload: message,
+      });
+
+      setMessages((prev) => [...prev.slice(-49), message]);
+    },
+    [username]
+  );
+
   return {
     otherPlayers: Array.from(otherPlayers.values()),
     connected,
     updatePosition,
     playerId,
+    messages,
+    sendMessage,
   };
 }
