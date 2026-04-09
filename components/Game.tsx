@@ -74,6 +74,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const { currentEmote, triggerEmote, clearEmote } = useEmotes();
   const [mobileInput, setMobileInput] = useState({ x: 0, z: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [showTOS, setShowTOS] = useState(false);
   const [nameInput, setNameInput] = useState(username);
   const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
   const [goldenRockActivated, setGoldenRockActivated] = useState(false);
@@ -136,6 +137,24 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   }, [updatePosition]);
 
   const handleSaveName = () => {
+    if (!nameInput.trim()) return;
+
+    // Check if TOS accepted
+    const hasAcceptedTOS = localStorage.getItem("chat-tos-accepted") === "true";
+    if (!hasAcceptedTOS) {
+      setShowTOS(true);
+      return;
+    }
+
+    if (onUsernameChange) {
+      onUsernameChange(nameInput.trim());
+    }
+    setShowSettings(false);
+  };
+
+  const handleAcceptTOS = () => {
+    localStorage.setItem("chat-tos-accepted", "true");
+    setShowTOS(false);
     if (nameInput.trim() && onUsernameChange) {
       onUsernameChange(nameInput.trim());
     }
@@ -391,6 +410,97 @@ export default function Game({ username, onUsernameChange }: GameProps) {
             >
               Save
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* TOS Modal for name change */}
+      {showTOS && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 200,
+          }}
+          onClick={() => setShowTOS(false)}
+        >
+          <div
+            className="sketch-border animate-fade-in"
+            style={{
+              backgroundColor: "var(--matcha-cream)",
+              padding: "28px",
+              borderRadius: "1.5rem",
+              maxWidth: "400px",
+              margin: "16px",
+              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{
+              margin: "0 0 20px",
+              color: "var(--charcoal-800)",
+              fontSize: "20px",
+              fontFamily: "var(--font-noto)",
+              fontWeight: 500,
+            }}>
+              Terms of Service
+            </h3>
+            <div style={{
+              color: "var(--charcoal-600)",
+              fontSize: "14px",
+              lineHeight: "1.6",
+              marginBottom: "24px",
+              fontFamily: "var(--font-zen)",
+            }}>
+              <p style={{ margin: "0 0 12px" }}>By continuing, you agree to:</p>
+              <ul style={{ margin: 0, paddingLeft: "20px", color: "var(--charcoal-500)" }}>
+                <li style={{ marginBottom: "4px" }}>Be respectful to other players</li>
+                <li style={{ marginBottom: "4px" }}>No harassment, hate speech, or bullying</li>
+                <li style={{ marginBottom: "4px" }}>No inappropriate names or content</li>
+                <li>No sharing of personal information</li>
+              </ul>
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => setShowTOS(false)}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: "0.75rem",
+                  border: "1px solid var(--charcoal-300)",
+                  background: "transparent",
+                  color: "var(--charcoal-600)",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontFamily: "var(--font-zen)",
+                  fontWeight: 500,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAcceptTOS}
+                style={{
+                  flex: 1,
+                  padding: "12px 16px",
+                  borderRadius: "0.75rem",
+                  border: "none",
+                  background: "var(--charcoal-700)",
+                  color: "var(--matcha-cream)",
+                  cursor: "pointer",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  fontFamily: "var(--font-zen)",
+                }}
+              >
+                I Agree
+              </button>
+            </div>
           </div>
         </div>
       )}
