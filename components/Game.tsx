@@ -150,7 +150,6 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         />
         <OtherPlayers players={otherPlayers} />
       </Canvas>
-      <EmoteButtons onEmote={(emote) => triggerEmote(emote as EmoteType)} />
       <MobileControls onMove={handleMobileMove} />
       <ChatBox messages={messages} onSendMessage={sendMessage} />
       <Minimap
