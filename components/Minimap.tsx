@@ -72,6 +72,22 @@ export default function Minimap({
           }}
         />
 
+        {/* Golden rock */}
+        <div
+          style={{
+            position: "absolute",
+            left: worldToMap(12, 5).x - 5,
+            top: worldToMap(12, 5).y - 5,
+            width: 10,
+            height: 10,
+            borderRadius: "2px",
+            backgroundColor: "#FFD700",
+            border: "1.5px solid #CC9900",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          }}
+          title="Golden Rock"
+        />
+
         {/* Other players */}
         {otherPlayers.map((player) => {
           const pos = worldToMap(player.position[0], player.position[2]);
