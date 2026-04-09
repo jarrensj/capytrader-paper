@@ -11,7 +11,6 @@ import { EmoteType } from "@/hooks/useEmotes";
 const MOVE_SPEED = 5;
 const CAMERA_OFFSET = new Vector3(0, 5, 10);
 const CAMERA_LERP_FACTOR = 0.05;
-const BOUNDARY_LIMIT = 40;
 
 interface PlayerProps {
   username: string;
@@ -73,11 +72,6 @@ export default function Player({ username, emote, onClearEmote, mobileInput = { 
     // Apply movement
     groupRef.current.position.x += velocity.current.x * delta;
     groupRef.current.position.z += velocity.current.z * delta;
-
-    // Boundary limits - clamp position
-    const pos = groupRef.current.position;
-    pos.x = Math.max(-BOUNDARY_LIMIT, Math.min(BOUNDARY_LIMIT, pos.x));
-    pos.z = Math.max(-BOUNDARY_LIMIT, Math.min(BOUNDARY_LIMIT, pos.z));
 
     // Third-person camera follow
     const playerPosition = groupRef.current.position;
