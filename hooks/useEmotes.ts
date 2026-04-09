@@ -17,6 +17,12 @@ export function useEmotes() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger emotes when typing in an input
+      if (document.activeElement instanceof HTMLInputElement ||
+          document.activeElement instanceof HTMLTextAreaElement) {
+        return;
+      }
+
       switch (e.key) {
         case "1":
           setCurrentEmote("wave");
