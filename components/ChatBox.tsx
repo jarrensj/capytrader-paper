@@ -14,6 +14,11 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
   const [showTOS, setShowTOS] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   useEffect(() => {
     const accepted = localStorage.getItem("chat-tos-accepted") === "true";
@@ -65,7 +70,7 @@ export function ChatBox({ messages, onSendMessage }: ChatBoxProps) {
         position: "fixed",
         bottom: "20px",
         left: "16px",
-        width: "320px",
+        width: isMobile ? "200px" : "320px",
         zIndex: 1000,
       }}
     >

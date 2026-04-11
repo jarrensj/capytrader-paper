@@ -123,7 +123,12 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [hasFishingRod, setHasFishingRod] = useState(false);
   const [pondActivated, setPondActivated] = useState<"fish" | "no-rod" | null>(null);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
+  const [isMobile, setIsMobile] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
+
+  useEffect(() => {
+    setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   // Track recent messages for chat bubbles (show for 4 seconds)
   useEffect(() => {
@@ -310,7 +315,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       {/* Mobile interact button for golden rock */}
-      {isNearGoldenRock && !goldenRockActivated && (
+      {isMobile && isNearGoldenRock && !goldenRockActivated && (
         <button
           onClick={() => {
             setGoldenRockActivated(true);
@@ -318,8 +323,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           }}
           style={{
             position: "fixed",
-            bottom: 100,
-            right: 20,
+            bottom: 240,
+            right: 50,
             width: 70,
             height: 70,
             borderRadius: "50%",
@@ -342,7 +347,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       {/* Mobile interact button for pink rock */}
-      {isNearPinkRock && !pinkRockActivated && (
+      {isMobile && isNearPinkRock && !pinkRockActivated && (
         <button
           onClick={() => {
             setPinkRockActivated(true);
@@ -351,8 +356,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           }}
           style={{
             position: "fixed",
-            bottom: 100,
-            right: 20,
+            bottom: 240,
+            right: 50,
             width: 70,
             height: 70,
             borderRadius: "50%",
@@ -375,7 +380,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       {/* Mobile interact button for pond */}
-      {isNearPond && !pondActivated && (
+      {isMobile && isNearPond && !pondActivated && (
         <button
           onClick={() => {
             setPondActivated(hasFishingRod ? "fish" : "no-rod");
@@ -383,8 +388,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           }}
           style={{
             position: "fixed",
-            bottom: 100,
-            right: 20,
+            bottom: 240,
+            right: 50,
             width: 70,
             height: 70,
             borderRadius: "50%",

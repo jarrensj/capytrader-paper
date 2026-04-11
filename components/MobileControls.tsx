@@ -85,7 +85,7 @@ export default function MobileControls({ onMove }: MobileControlsProps) {
       style={{
         position: "fixed",
         bottom: "100px",
-        left: "40px",
+        right: "40px",
         width: "120px",
         height: "120px",
         borderRadius: "50%",
