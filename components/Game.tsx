@@ -13,6 +13,7 @@ import Minimap from "./Minimap";
 import GoldenRock from "./GoldenRock";
 import PinkRock from "./PinkRock";
 import TradingNPCRock from "./TradingNPCRock";
+import TradingModal from "./TradingModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -125,6 +126,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [hasFishingRod, setHasFishingRod] = useState(false);
   const [pondActivated, setPondActivated] = useState<"fish" | "no-rod" | null>(null);
   const [tradingNPCActivated, setTradingNPCActivated] = useState(false);
+  const [showTradingModal, setShowTradingModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
@@ -209,7 +211,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
 
         if (isNearTradingNPC && !tradingNPCActivated) {
           setTradingNPCActivated(true);
-          setTimeout(() => setTradingNPCActivated(false), 2000);
+          setShowTradingModal(true);
+          setTimeout(() => setTradingNPCActivated(false), 500);
         }
       }
     };
@@ -282,7 +285,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         />
         <TradingNPCRock
           position={TRADING_NPC_POSITION}
-          isNearby={isNearTradingNPC}
+          isNearby={isNearTradingNPC && !showTradingModal}
           isActivated={tradingNPCActivated}
         />
         <Player
@@ -436,7 +439,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <button
           onClick={() => {
             setTradingNPCActivated(true);
-            setTimeout(() => setTradingNPCActivated(false), 2000);
+            setShowTradingModal(true);
+            setTimeout(() => setTradingNPCActivated(false), 500);
           }}
           style={{
             position: "fixed",
@@ -720,6 +724,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           </div>
         </div>
       )}
+
+      <TradingModal isOpen={showTradingModal} onClose={() => setShowTradingModal(false)} />
     </KeyboardControls>
   );
 }
