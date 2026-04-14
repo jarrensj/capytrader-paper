@@ -30,6 +30,7 @@ function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
     <group ref={groupRef} position={player.position}>
       <Html
         center
+        zIndexRange={[0, 100]}
         style={{
           fontSize: "32px",
           fontWeight: "bold",
@@ -46,6 +47,7 @@ function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
         <Html
           position={[0, 2.3, 0]}
           center
+          zIndexRange={[0, 100]}
           style={{
             color: "var(--charcoal-700)",
             backgroundColor: "rgba(250, 248, 240, 0.95)",
@@ -68,6 +70,7 @@ function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
       <Html
         position={[0, 1.5, 0]}
         center
+        zIndexRange={[0, 100]}
         style={{
           color: "#333",
           backgroundColor: "rgba(255, 255, 255, 0.8)",
