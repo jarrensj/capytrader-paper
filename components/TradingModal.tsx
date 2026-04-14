@@ -77,7 +77,7 @@ export default function TradingModal({ isOpen, onClose }: TradingModalProps) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 2000,
+        zIndex: 9999,
       }}
       onClick={onClose}
     >
@@ -92,6 +92,8 @@ export default function TradingModal({ isOpen, onClose }: TradingModalProps) {
           maxHeight: "85vh",
           overflow: "auto",
           boxShadow: "0 4px 24px rgba(0, 0, 0, 0.15)",
+          position: "relative",
+          zIndex: 10000,
         }}
         onClick={(e) => e.stopPropagation()}
       >
