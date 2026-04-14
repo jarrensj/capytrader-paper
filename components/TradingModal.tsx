@@ -78,6 +78,7 @@ export default function TradingModal({ isOpen, onClose }: TradingModalProps) {
         alignItems: "center",
         justifyContent: "center",
         zIndex: 9999,
+        isolation: "isolate",
       }}
       onClick={onClose}
     >
