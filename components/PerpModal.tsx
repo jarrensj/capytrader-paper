@@ -46,15 +46,29 @@ export default function PerpModal({ isOpen, onClose }: PerpModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{
-            margin: 0,
-            color: "var(--charcoal-800)",
-            fontFamily: "var(--font-noto)",
-            fontSize: 18,
-            fontWeight: 500,
-          }}>
-            Perpetual Futures
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h2 style={{
+              margin: 0,
+              color: "var(--charcoal-800)",
+              fontFamily: "var(--font-noto)",
+              fontSize: 18,
+              fontWeight: 500,
+            }}>
+              Perpetual Futures
+            </h2>
+            <span style={{
+              backgroundColor: "#FFD700",
+              color: "#5c4800",
+              fontSize: 9,
+              fontWeight: 600,
+              padding: "2px 6px",
+              borderRadius: 4,
+              fontFamily: "var(--font-zen)",
+              textTransform: "uppercase",
+            }}>
+              Placeholder
+            </span>
+          </div>
           <button
             onClick={onClose}
             style={{
@@ -92,25 +106,12 @@ export default function PerpModal({ isOpen, onClose }: PerpModalProps) {
               }}
             >
               <div style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--charcoal-700)",
+                fontFamily: "var(--font-zen)",
               }}>
-                <div style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: "var(--charcoal-700)",
-                  fontFamily: "var(--font-zen)",
-                }}>
-                  {perp.symbol}
-                </div>
-                <div style={{
-                  fontSize: 10,
-                  color: "var(--charcoal-400)",
-                  fontFamily: "var(--font-zen)",
-                }}>
-                  placeholder
-                </div>
+                {perp.symbol}
               </div>
 
               <div style={{
