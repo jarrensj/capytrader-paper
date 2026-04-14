@@ -120,6 +120,22 @@ export default function Minimap({
           title="Trading NPC"
         />
 
+        {/* Perp rock */}
+        <div
+          style={{
+            position: "absolute",
+            left: worldToMap(-20, -15).x - 5,
+            top: worldToMap(-20, -15).y - 5,
+            width: 10,
+            height: 10,
+            borderRadius: "2px",
+            backgroundColor: "#FFD700",
+            border: "1.5px solid #CCA700",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          }}
+          title="Perp Rock"
+        />
+
         {/* Other players */}
         {otherPlayers.map((player) => {
           const pos = worldToMap(player.position[0], player.position[2]);
