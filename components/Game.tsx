@@ -13,6 +13,8 @@ import Minimap from "./Minimap";
 import GoldenRock from "./GoldenRock";
 import PinkRock from "./PinkRock";
 import TradingNPCRock from "./TradingNPCRock";
+import PerpRock from "./PerpRock";
+import PerpModal from "./PerpModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -20,6 +22,7 @@ const GOLDEN_ROCK_POSITION: [number, number, number] = [12, 0, 5];
 const PINK_ROCK_POSITION: [number, number, number] = [-15, 0, 10];
 const POND_POSITION: [number, number, number] = [-8, 0, -5];
 const TRADING_NPC_POSITION: [number, number, number] = [18, 0, -8];
+const PERP_ROCK_POSITION: [number, number, number] = [-20, 0, -15];
 
 interface GameProps {
   username: string;
@@ -125,6 +128,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [hasFishingRod, setHasFishingRod] = useState(false);
   const [pondActivated, setPondActivated] = useState<"fish" | "no-rod" | null>(null);
   const [tradingNPCActivated, setTradingNPCActivated] = useState(false);
+  const [perpRockActivated, setPerpRockActivated] = useState(false);
+  const [showPerpModal, setShowPerpModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
@@ -184,6 +189,13 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   );
   const isNearTradingNPC = distanceToTradingNPC < 4;
 
+  // Check if player is near the perp rock
+  const distanceToPerpRock = Math.sqrt(
+    Math.pow(localPosition[0] - PERP_ROCK_POSITION[0], 2) +
+    Math.pow(localPosition[2] - PERP_ROCK_POSITION[2], 2)
+  );
+  const isNearPerpRock = distanceToPerpRock < 4;
+
   // Handle F key press for interactions
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -211,12 +223,18 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           setTradingNPCActivated(true);
           setTimeout(() => setTradingNPCActivated(false), 2000);
         }
+
+        if (isNearPerpRock && !perpRockActivated) {
+          setPerpRockActivated(true);
+          setShowPerpModal(true);
+          setTimeout(() => setPerpRockActivated(false), 500);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated]);
+  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -284,6 +302,11 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           position={TRADING_NPC_POSITION}
           isNearby={isNearTradingNPC}
           isActivated={tradingNPCActivated}
+        />
+        <PerpRock
+          position={PERP_ROCK_POSITION}
+          isNearby={isNearPerpRock && !showPerpModal}
+          isActivated={perpRockActivated}
         />
         <Player
           username={username}
@@ -448,6 +471,39 @@ export default function Game({ username, onUsernameChange }: GameProps) {
             backgroundColor: "rgba(137, 207, 240, 0.9)",
             border: "3px solid #5BA3C6",
             color: "#1a365d",
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          Interact
+        </button>
+      )}
+
+      {/* Mobile interact button for perp rock */}
+      {isMobile && isNearPerpRock && !perpRockActivated && (
+        <button
+          onClick={() => {
+            setPerpRockActivated(true);
+            setShowPerpModal(true);
+            setTimeout(() => setPerpRockActivated(false), 500);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 240,
+            right: 50,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(255, 215, 0, 0.9)",
+            border: "3px solid #CCA700",
+            color: "#5c4800",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "var(--font-zen)",
@@ -720,6 +776,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           </div>
         </div>
       )}
+
+      <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
     </KeyboardControls>
   );
 }
