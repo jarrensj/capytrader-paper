@@ -13,6 +13,7 @@ import Minimap from "./Minimap";
 import GoldenRock from "./GoldenRock";
 import PinkRock from "./PinkRock";
 import TradingNPCRock from "./TradingNPCRock";
+import BasketballModal from "./BasketballModal";
 import PerpRock from "./PerpRock";
 import PerpModal from "./PerpModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
@@ -128,6 +129,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [hasFishingRod, setHasFishingRod] = useState(false);
   const [pondActivated, setPondActivated] = useState<"fish" | "no-rod" | null>(null);
   const [tradingNPCActivated, setTradingNPCActivated] = useState(false);
+  const [showBasketballModal, setShowBasketballModal] = useState(false);
   const [perpRockActivated, setPerpRockActivated] = useState(false);
   const [showPerpModal, setShowPerpModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
@@ -221,7 +223,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
 
         if (isNearTradingNPC && !tradingNPCActivated) {
           setTradingNPCActivated(true);
-          setTimeout(() => setTradingNPCActivated(false), 2000);
+          setShowBasketballModal(true);
+          setTimeout(() => setTradingNPCActivated(false), 500);
         }
 
         if (isNearPerpRock && !perpRockActivated) {
@@ -300,7 +303,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         />
         <TradingNPCRock
           position={TRADING_NPC_POSITION}
-          isNearby={isNearTradingNPC}
+          isNearby={isNearTradingNPC && !showBasketballModal}
           isActivated={tradingNPCActivated}
         />
         <PerpRock
@@ -455,11 +458,12 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       {/* Mobile interact button for trading NPC rock */}
-      {isMobile && isNearTradingNPC && !tradingNPCActivated && (
+      {isMobile && isNearTradingNPC && !tradingNPCActivated && !showBasketballModal && (
         <button
           onClick={() => {
             setTradingNPCActivated(true);
-            setTimeout(() => setTradingNPCActivated(false), 2000);
+            setShowBasketballModal(true);
+            setTimeout(() => setTradingNPCActivated(false), 500);
           }}
           style={{
             position: "fixed",
@@ -777,6 +781,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         </div>
       )}
 
+      <BasketballModal isOpen={showBasketballModal} onClose={() => setShowBasketballModal(false)} />
       <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
     </KeyboardControls>
   );
