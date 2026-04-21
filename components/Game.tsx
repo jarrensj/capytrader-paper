@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { KeyboardControls, Html } from "@react-three/drei";
 import Player from "./Player";
 import Environment from "./Environment";
+import Rain from "./Rain";
 import EmoteButtons from "./EmoteButtons";
 import MobileControls from "./MobileControls";
 import OtherPlayers from "./OtherPlayers";
@@ -288,6 +289,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <Ground />
         <Water isNearby={isNearPond} activatedState={pondActivated} />
         <Environment />
+        <Rain />
         <GoldenRock
           position={GOLDEN_ROCK_POSITION}
           isNearby={isNearGoldenRock}
