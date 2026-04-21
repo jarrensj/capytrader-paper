@@ -18,6 +18,7 @@ import PerpRock from "./PerpRock";
 import PerpModal from "./PerpModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
+import { useWeather } from "@/hooks/useWeather";
 
 const GOLDEN_ROCK_POSITION: [number, number, number] = [12, 0, 5];
 const PINK_ROCK_POSITION: [number, number, number] = [-15, 0, 10];
@@ -134,6 +135,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
+  const { isRaining } = useWeather();
 
   useEffect(() => {
     setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -289,7 +291,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <Ground />
         <Water isNearby={isNearPond} activatedState={pondActivated} />
         <Environment />
-        <Rain />
+        {isRaining && <Rain />}
         <GoldenRock
           position={GOLDEN_ROCK_POSITION}
           isNearby={isNearGoldenRock}
