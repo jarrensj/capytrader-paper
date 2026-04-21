@@ -8,11 +8,11 @@ import { PlayerState, ChatMessage } from "@/hooks/useMultiplayer";
 
 const LERP_FACTOR = 0.15;
 
-// Earthy rock colors for player character
+// Light earthy rock colors for player character
 const ROCK_COLORS = {
-  primary: "#8B7355",
-  secondary: "#A08060",
-  accent: "#6B5344",
+  primary: "#C4A882",    // Light tan/brown
+  secondary: "#D4BC9A",  // Lighter tan
+  accent: "#B09670",     // Medium tan
 };
 
 interface OtherPlayerProps {

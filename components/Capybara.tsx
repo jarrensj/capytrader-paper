@@ -9,11 +9,11 @@ interface CapybaraProps {
   emote?: EmoteType;
 }
 
-// Earthy rock colors for player character
+// Light earthy rock colors for player character
 const ROCK_COLORS = {
-  primary: "#8B7355",    // Warm brown
-  secondary: "#A08060",  // Lighter brown
-  accent: "#6B5344",     // Darker brown
+  primary: "#C4A882",    // Light tan/brown
+  secondary: "#D4BC9A",  // Lighter tan
+  accent: "#B09670",     // Medium tan
 };
 
 export default function Capybara({ emote = "none" }: CapybaraProps) {
