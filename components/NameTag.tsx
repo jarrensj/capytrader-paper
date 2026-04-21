@@ -12,7 +12,7 @@ export default function NameTag({ name, chatMessage }: NameTagProps) {
     <>
       {chatMessage && (
         <Html
-          position={[0, 2.8, 0]}
+          position={[0, 1.3, 0]}
           center
           style={{
             color: "var(--charcoal-700)",
@@ -35,7 +35,7 @@ export default function NameTag({ name, chatMessage }: NameTagProps) {
         </Html>
       )}
       <Html
-        position={[0, 2, 0]}
+        position={[0, 0.95, 0]}
         center
         style={{
           color: "#333",
