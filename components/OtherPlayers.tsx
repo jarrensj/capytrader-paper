@@ -8,6 +8,13 @@ import { PlayerState, ChatMessage } from "@/hooks/useMultiplayer";
 
 const LERP_FACTOR = 0.15;
 
+// Earthy rock colors for player character
+const ROCK_COLORS = {
+  primary: "#8B7355",
+  secondary: "#A08060",
+  accent: "#6B5344",
+};
+
 interface OtherPlayerProps {
   player: PlayerState;
   chatMessage?: string;
@@ -16,35 +23,68 @@ interface OtherPlayerProps {
 function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
   const groupRef = useRef<Group>(null);
   const targetPosition = useRef(new Vector3(...player.position));
+  const targetRotation = useRef(player.rotation);
 
   // Update target when player data changes
   targetPosition.current.set(...player.position);
+  targetRotation.current = player.rotation;
 
   // Smooth interpolation
   useFrame(() => {
     if (!groupRef.current) return;
     groupRef.current.position.lerp(targetPosition.current, LERP_FACTOR);
+    // Smoothly interpolate rotation
+    const currentY = groupRef.current.rotation.y;
+    const targetY = targetRotation.current;
+    groupRef.current.rotation.y = currentY + (targetY - currentY) * LERP_FACTOR;
   });
 
   return (
-    <group ref={groupRef} position={player.position}>
-      <Html
-        center
-        style={{
-          fontSize: "32px",
-          fontWeight: "bold",
-          color: "#8B7355",
-          textShadow: "2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff",
-          userSelect: "none",
-          pointerEvents: "none",
-          whiteSpace: "nowrap",
-        }}
-      >
-        capy
-      </Html>
+    <group ref={groupRef} position={player.position} rotation={[0, player.rotation, 0]}>
+      {/* Main rock body */}
+      <mesh position={[0, 0.25, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.4, 0.45]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.primary}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Top block */}
+      <mesh position={[0, 0.55, 0.02]} castShadow rotation={[0, 0.15, 0]}>
+        <boxGeometry args={[0.35, 0.22, 0.3]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.secondary}
+          metalness={0.1}
+          roughness={0.65}
+        />
+      </mesh>
+
+      {/* Small accent */}
+      <mesh position={[0.28, 0.18, 0.12]} castShadow rotation={[0, 0.3, 0]}>
+        <boxGeometry args={[0.15, 0.15, 0.15]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.accent}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Other side accent */}
+      <mesh position={[-0.25, 0.2, 0.08]} castShadow rotation={[0, -0.2, 0]}>
+        <boxGeometry args={[0.12, 0.12, 0.12]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.secondary}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Chat message bubble */}
       {chatMessage && (
         <Html
-          position={[0, 2.3, 0]}
+          position={[0, 1.3, 0]}
           center
           style={{
             color: "var(--charcoal-700)",
@@ -65,8 +105,10 @@ function OtherPlayer({ player, chatMessage }: OtherPlayerProps) {
           {chatMessage}
         </Html>
       )}
+
+      {/* Name tag */}
       <Html
-        position={[0, 1.5, 0]}
+        position={[0, 0.95, 0]}
         center
         style={{
           color: "#333",
