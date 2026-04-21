@@ -9,21 +9,71 @@ interface CapybaraProps {
   emote?: EmoteType;
 }
 
+// Light earthy rock colors for player character
+const ROCK_COLORS = {
+  primary: "#C4A882",    // Light tan/brown
+  secondary: "#D4BC9A",  // Lighter tan
+  accent: "#B09670",     // Medium tan
+};
+
 export default function Capybara({ emote = "none" }: CapybaraProps) {
+  const emoteEmoji = emote === "wave" ? "👋" : emote === "dance" ? "💃" : emote === "sit" ? "🪑" : null;
+
   return (
-    <Html
-      center
-      style={{
-        fontSize: "32px",
-        fontWeight: "bold",
-        color: "#8B7355",
-        textShadow: "2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff",
-        userSelect: "none",
-        pointerEvents: "none",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {emote === "wave" ? "capy 👋" : emote === "dance" ? "capy 💃" : emote === "sit" ? "capy 🪑" : "capy"}
-    </Html>
+    <group>
+      {/* Main rock body - scaled down version of BaseRock style */}
+      <mesh position={[0, 0.25, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.4, 0.45]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.primary}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Top block - gives it a head-like appearance */}
+      <mesh position={[0, 0.55, 0.02]} castShadow rotation={[0, 0.15, 0]}>
+        <boxGeometry args={[0.35, 0.22, 0.3]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.secondary}
+          metalness={0.1}
+          roughness={0.65}
+        />
+      </mesh>
+
+      {/* Small accent - like a little arm/bump */}
+      <mesh position={[0.28, 0.18, 0.12]} castShadow rotation={[0, 0.3, 0]}>
+        <boxGeometry args={[0.15, 0.15, 0.15]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.accent}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Other side accent */}
+      <mesh position={[-0.25, 0.2, 0.08]} castShadow rotation={[0, -0.2, 0]}>
+        <boxGeometry args={[0.12, 0.12, 0.12]} />
+        <meshStandardMaterial
+          color={ROCK_COLORS.secondary}
+          metalness={0.1}
+          roughness={0.7}
+        />
+      </mesh>
+
+      {/* Emote display above the rock */}
+      {emoteEmoji && (
+        <Html position={[0, 1, 0]} center>
+          <div style={{
+            fontSize: "24px",
+            animation: "bounce 0.5s ease-out",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}>
+            {emoteEmoji}
+          </div>
+        </Html>
+      )}
+    </group>
   );
 }
