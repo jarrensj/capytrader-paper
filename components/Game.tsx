@@ -16,6 +16,8 @@ import PinkRock from "./PinkRock";
 import TradingNPCRock from "./TradingNPCRock";
 import PerpRock from "./PerpRock";
 import PerpModal from "./PerpModal";
+import IpoRock from "./IpoRock";
+import IpoModal from "./IpoModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -24,6 +26,7 @@ const PINK_ROCK_POSITION: [number, number, number] = [-15, 0, 10];
 const POND_POSITION: [number, number, number] = [-8, 0, -5];
 const TRADING_NPC_POSITION: [number, number, number] = [18, 0, -8];
 const PERP_ROCK_POSITION: [number, number, number] = [-20, 0, -15];
+const IPO_ROCK_POSITION: [number, number, number] = [22, 0, 12];
 
 interface GameProps {
   username: string;
@@ -131,6 +134,8 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [tradingNPCActivated, setTradingNPCActivated] = useState(false);
   const [perpRockActivated, setPerpRockActivated] = useState(false);
   const [showPerpModal, setShowPerpModal] = useState(false);
+  const [ipoRockActivated, setIpoRockActivated] = useState(false);
+  const [showIpoModal, setShowIpoModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
   const { otherPlayers, connected, updatePosition, messages, sendMessage } = useMultiplayer(username);
@@ -197,6 +202,13 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   );
   const isNearPerpRock = distanceToPerpRock < 4;
 
+  // Check if player is near the IPO rock
+  const distanceToIpoRock = Math.sqrt(
+    Math.pow(localPosition[0] - IPO_ROCK_POSITION[0], 2) +
+    Math.pow(localPosition[2] - IPO_ROCK_POSITION[2], 2)
+  );
+  const isNearIpoRock = distanceToIpoRock < 4;
+
   // Handle F key press for interactions
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -230,12 +242,18 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           setShowPerpModal(true);
           setTimeout(() => setPerpRockActivated(false), 500);
         }
+
+        if (isNearIpoRock && !ipoRockActivated) {
+          setIpoRockActivated(true);
+          setShowIpoModal(true);
+          setTimeout(() => setIpoRockActivated(false), 500);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated]);
+  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated, isNearIpoRock, ipoRockActivated]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -309,6 +327,11 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           position={PERP_ROCK_POSITION}
           isNearby={isNearPerpRock && !showPerpModal}
           isActivated={perpRockActivated}
+        />
+        <IpoRock
+          position={IPO_ROCK_POSITION}
+          isNearby={isNearIpoRock && !showIpoModal}
+          isActivated={ipoRockActivated}
         />
         <Player
           username={username}
@@ -506,6 +529,39 @@ export default function Game({ username, onUsernameChange }: GameProps) {
             backgroundColor: "rgba(255, 215, 0, 0.9)",
             border: "3px solid #CCA700",
             color: "#5c4800",
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          Interact
+        </button>
+      )}
+
+      {/* Mobile interact button for IPO rock */}
+      {isMobile && isNearIpoRock && !ipoRockActivated && (
+        <button
+          onClick={() => {
+            setIpoRockActivated(true);
+            setShowIpoModal(true);
+            setTimeout(() => setIpoRockActivated(false), 500);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 240,
+            right: 50,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(155, 126, 222, 0.9)",
+            border: "3px solid #7A5DC7",
+            color: "#2d1b5e",
             fontSize: 12,
             fontWeight: 600,
             fontFamily: "var(--font-zen)",
@@ -780,6 +836,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
+      <IpoModal isOpen={showIpoModal} onClose={() => setShowIpoModal(false)} />
     </KeyboardControls>
   );
 }
