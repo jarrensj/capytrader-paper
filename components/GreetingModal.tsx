@@ -1,12 +1,16 @@
 "use client";
 
 import BaseModal from "./BaseModal";
-import { GmLog } from "@/hooks/useMultiplayer";
+import { GreetingLog } from "@/hooks/useMultiplayer";
 
-interface GmModalProps {
+interface GreetingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  gmLogs: GmLog[];
+  logs: GreetingLog[];
+  greeting: "gm" | "gn";
+  emoji: string;
+  badgeBackgroundColor: string;
+  badgeTextColor: string;
 }
 
 function isSameDay(a: number, b: number) {
@@ -27,21 +31,29 @@ function formatTime(ts: number) {
   });
 }
 
-export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
+export default function GreetingModal({
+  isOpen,
+  onClose,
+  logs,
+  greeting,
+  emoji,
+  badgeBackgroundColor,
+  badgeTextColor,
+}: GreetingModalProps) {
   const now = Date.now();
-  const todaysGms = gmLogs
-    .filter((gm) => isSameDay(gm.timestamp, now))
+  const todays = logs
+    .filter((log) => isSameDay(log.timestamp, now))
     .sort((a, b) => b.timestamp - a.timestamp);
 
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title="gm Rock ☀️"
+      title={`${greeting} Rock ${emoji}`}
       badge={{
-        text: `${todaysGms.length} today`,
-        backgroundColor: "#F4A460",
-        textColor: "#7a4b17",
+        text: `${todays.length} today`,
+        backgroundColor: badgeBackgroundColor,
+        textColor: badgeTextColor,
       }}
       footer={
         <div
@@ -52,7 +64,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
             textAlign: "center",
           }}
         >
-          Resets at midnight · only gms from players online are shown
+          Resets at midnight · only {greeting}s from players online are shown
         </div>
       }
     >
@@ -65,10 +77,10 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
           marginBottom: 10,
         }}
       >
-        Today&apos;s gms
+        Today&apos;s {greeting}s
       </div>
 
-      {todaysGms.length === 0 ? (
+      {todays.length === 0 ? (
         <div
           style={{
             background: "var(--matcha-100)",
@@ -81,7 +93,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
             fontSize: 13,
           }}
         >
-          No gms yet today. Be the first to say gm!
+          No {greeting}s yet today. Be the first to say {greeting}!
         </div>
       ) : (
         <div
@@ -94,9 +106,9 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
             paddingRight: 4,
           }}
         >
-          {todaysGms.map((gm) => (
+          {todays.map((log) => (
             <div
-              key={gm.id}
+              key={log.id}
               style={{
                 background: "var(--matcha-100)",
                 borderRadius: "0.75rem",
@@ -116,7 +128,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
                   minWidth: 0,
                 }}
               >
-                <span style={{ fontSize: 18 }}>☀️</span>
+                <span style={{ fontSize: 18 }}>{emoji}</span>
                 <span
                   style={{
                     fontSize: 14,
@@ -128,7 +140,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {gm.name}
+                  {log.name}
                 </span>
                 <span
                   style={{
@@ -137,7 +149,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
                     fontFamily: "var(--font-zen)",
                   }}
                 >
-                  said gm
+                  said {greeting}
                 </span>
               </div>
               <div
@@ -149,7 +161,7 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
                   flexShrink: 0,
                 }}
               >
-                {formatTime(gm.timestamp)}
+                {formatTime(log.timestamp)}
               </div>
             </div>
           ))}

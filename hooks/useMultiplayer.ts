@@ -18,13 +18,7 @@ export type ChatMessage = {
   timestamp: number;
 };
 
-export type GmLog = {
-  id: string;
-  name: string;
-  timestamp: number;
-};
-
-export type GnLog = {
+export type GreetingLog = {
   id: string;
   name: string;
   timestamp: number;
@@ -34,8 +28,8 @@ export function useMultiplayer(username: string) {
   const [otherPlayers, setOtherPlayers] = useState<Map<string, PlayerState>>(new Map());
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [gmLogs, setGmLogs] = useState<GmLog[]>([]);
-  const [gnLogs, setGnLogs] = useState<GnLog[]>([]);
+  const [gmLogs, setGmLogs] = useState<GreetingLog[]>([]);
+  const [gnLogs, setGnLogs] = useState<GreetingLog[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [playerId] = useState(() => crypto.randomUUID());
   const lastUpdateRef = useRef<number>(0);
@@ -67,10 +61,10 @@ export function useMultiplayer(username: string) {
         setMessages((prev) => [...prev.slice(-49), payload as ChatMessage]);
       })
       .on("broadcast", { event: "gm" }, ({ payload }) => {
-        setGmLogs((prev) => [...prev, payload as GmLog]);
+        setGmLogs((prev) => [...prev, payload as GreetingLog]);
       })
       .on("broadcast", { event: "gn" }, ({ payload }) => {
-        setGnLogs((prev) => [...prev, payload as GnLog]);
+        setGnLogs((prev) => [...prev, payload as GreetingLog]);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -147,7 +141,7 @@ export function useMultiplayer(username: string) {
   const sendGm = useCallback(() => {
     if (!channelRef.current) return;
 
-    const gm: GmLog = {
+    const gm: GreetingLog = {
       id: crypto.randomUUID(),
       name: username,
       timestamp: Date.now(),
@@ -165,7 +159,7 @@ export function useMultiplayer(username: string) {
   const sendGn = useCallback(() => {
     if (!channelRef.current) return;
 
-    const gn: GnLog = {
+    const gn: GreetingLog = {
       id: crypto.randomUUID(),
       name: username,
       timestamp: Date.now(),

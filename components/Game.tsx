@@ -17,9 +17,8 @@ import TradingNPCRock from "./TradingNPCRock";
 import PerpRock from "./PerpRock";
 import PerpModal from "./PerpModal";
 import GmRock from "./GmRock";
-import GmModal from "./GmModal";
 import GnRock from "./GnRock";
-import GnModal from "./GnModal";
+import GreetingModal from "./GreetingModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -896,8 +895,24 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
-      <GmModal isOpen={showGmModal} onClose={() => setShowGmModal(false)} gmLogs={gmLogs} />
-      <GnModal isOpen={showGnModal} onClose={() => setShowGnModal(false)} gnLogs={gnLogs} />
+      <GreetingModal
+        isOpen={showGmModal}
+        onClose={() => setShowGmModal(false)}
+        logs={gmLogs}
+        greeting="gm"
+        emoji="☀️"
+        badgeBackgroundColor="#F4A460"
+        badgeTextColor="#7a4b17"
+      />
+      <GreetingModal
+        isOpen={showGnModal}
+        onClose={() => setShowGnModal(false)}
+        logs={gnLogs}
+        greeting="gn"
+        emoji="🌙"
+        badgeBackgroundColor="#3B3B6D"
+        badgeTextColor="#E6E6FA"
+      />
     </KeyboardControls>
   );
 }
