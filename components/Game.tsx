@@ -144,7 +144,19 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [showGnModal, setShowGnModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
-  const { otherPlayers, connected, updatePosition, messages, sendMessage, gmLogs, sendGm, gnLogs, sendGn } = useMultiplayer(username);
+  const {
+    otherPlayers,
+    connected,
+    updatePosition,
+    messages,
+    sendMessage,
+    gmLogs,
+    sendGm,
+    hasSaidGmToday,
+    gnLogs,
+    sendGn,
+    hasSaidGnToday,
+  } = useMultiplayer(username);
 
   useEffect(() => {
     setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -258,15 +270,19 @@ export default function Game({ username, onUsernameChange }: GameProps) {
 
         if (isNearGmRock && !gmRockActivated) {
           setGmRockActivated(true);
-          sendGm();
           setShowGmModal(true);
+          if (!hasSaidGmToday) {
+            void sendGm();
+          }
           setTimeout(() => setGmRockActivated(false), 1500);
         }
 
         if (isNearGnRock && !gnRockActivated) {
           setGnRockActivated(true);
-          sendGn();
           setShowGnModal(true);
+          if (!hasSaidGnToday) {
+            void sendGn();
+          }
           setTimeout(() => setGnRockActivated(false), 1500);
         }
       }
@@ -274,7 +290,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated, isNearGmRock, gmRockActivated, sendGm, isNearGnRock, gnRockActivated, sendGn]);
+  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated, isNearGmRock, gmRockActivated, sendGm, hasSaidGmToday, isNearGnRock, gnRockActivated, sendGn, hasSaidGnToday]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -575,8 +591,10 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <button
           onClick={() => {
             setGmRockActivated(true);
-            sendGm();
             setShowGmModal(true);
+            if (!hasSaidGmToday) {
+              void sendGm();
+            }
             setTimeout(() => setGmRockActivated(false), 1500);
           }}
           style={{
@@ -609,8 +627,10 @@ export default function Game({ username, onUsernameChange }: GameProps) {
         <button
           onClick={() => {
             setGnRockActivated(true);
-            sendGn();
             setShowGnModal(true);
+            if (!hasSaidGnToday) {
+              void sendGn();
+            }
             setTimeout(() => setGnRockActivated(false), 1500);
           }}
           style={{
@@ -1012,8 +1032,18 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       )}
 
       <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
-      <GmModal isOpen={showGmModal} onClose={() => setShowGmModal(false)} gmLogs={gmLogs} />
-      <GnModal isOpen={showGnModal} onClose={() => setShowGnModal(false)} gnLogs={gnLogs} />
+      <GmModal
+        isOpen={showGmModal}
+        onClose={() => setShowGmModal(false)}
+        gmLogs={gmLogs}
+        hasSaidGmToday={hasSaidGmToday}
+      />
+      <GnModal
+        isOpen={showGnModal}
+        onClose={() => setShowGnModal(false)}
+        gnLogs={gnLogs}
+        hasSaidGnToday={hasSaidGnToday}
+      />
     </KeyboardControls>
   );
 }
