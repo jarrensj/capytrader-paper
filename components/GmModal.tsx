@@ -7,6 +7,7 @@ interface GmModalProps {
   isOpen: boolean;
   onClose: () => void;
   gmLogs: GmLog[];
+  hasSaidGmToday: boolean;
 }
 
 function isSameDay(a: number, b: number) {
@@ -27,7 +28,7 @@ function formatTime(ts: number) {
   });
 }
 
-export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
+export default function GmModal({ isOpen, onClose, gmLogs, hasSaidGmToday }: GmModalProps) {
   const now = Date.now();
   const todaysGms = gmLogs
     .filter((gm) => isSameDay(gm.timestamp, now))
@@ -52,10 +53,31 @@ export default function GmModal({ isOpen, onClose, gmLogs }: GmModalProps) {
             textAlign: "center",
           }}
         >
-          Resets at midnight · only gms from players online are shown
+          One gm per player per day · resets at midnight UTC
         </div>
       }
     >
+      {hasSaidGmToday && (
+        <div
+          style={{
+            background: "#FFF3E0",
+            border: "1px solid #F4A460",
+            borderRadius: "0.75rem",
+            padding: "10px 14px",
+            marginBottom: 12,
+            fontFamily: "var(--font-zen)",
+            fontSize: 13,
+            color: "#7a4b17",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 16 }}>☀️</span>
+          You already said gm today — see you tomorrow!
+        </div>
+      )}
+
       <div
         style={{
           fontSize: 13,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -30,6 +30,20 @@ export type GnLog = {
   timestamp: number;
 };
 
+export type GreetResult =
+  | { ok: true }
+  | { ok: false; reason: "already-said-today" | "error" };
+
+function isSameLocalDay(a: number, b: number) {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+}
+
 export function useMultiplayer(username: string) {
   const [otherPlayers, setOtherPlayers] = useState<Map<string, PlayerState>>(new Map());
   const [connected, setConnected] = useState(false);
@@ -38,8 +52,70 @@ export function useMultiplayer(username: string) {
   const [gnLogs, setGnLogs] = useState<GnLog[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [playerId] = useState(() => crypto.randomUUID());
+  // Snapshot of "today" at session start. Used to determine if a log counts as today.
+  // Midnight rollover during a long session is handled by the server's unique-per-day constraint.
+  const [todayAnchor] = useState(() => Date.now());
   const lastUpdateRef = useRef<number>(0);
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Load today's persisted gm/gn logs from Supabase on mount.
+  useEffect(() => {
+    const since = new Date();
+    since.setUTCHours(0, 0, 0, 0);
+    // Fetch a bit earlier than UTC midnight so clients in earlier timezones still see their "today".
+    since.setUTCDate(since.getUTCDate() - 1);
+    const sinceIso = since.toISOString();
+
+    let cancelled = false;
+
+    supabase
+      .from("gm_logs")
+      .select("id, name, created_at")
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setGmLogs((prev) => {
+          const seen = new Set(prev.map((g) => g.id));
+          const next = [...prev];
+          for (const row of data) {
+            if (seen.has(row.id)) continue;
+            next.push({
+              id: row.id,
+              name: row.name,
+              timestamp: new Date(row.created_at).getTime(),
+            });
+          }
+          return next;
+        });
+      });
+
+    supabase
+      .from("gn_logs")
+      .select("id, name, created_at")
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: true })
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setGnLogs((prev) => {
+          const seen = new Set(prev.map((g) => g.id));
+          const next = [...prev];
+          for (const row of data) {
+            if (seen.has(row.id)) continue;
+            next.push({
+              id: row.id,
+              name: row.name,
+              timestamp: new Date(row.created_at).getTime(),
+            });
+          }
+          return next;
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (!username || !playerId) return;
@@ -67,10 +143,12 @@ export function useMultiplayer(username: string) {
         setMessages((prev) => [...prev.slice(-49), payload as ChatMessage]);
       })
       .on("broadcast", { event: "gm" }, ({ payload }) => {
-        setGmLogs((prev) => [...prev, payload as GmLog]);
+        const gm = payload as GmLog;
+        setGmLogs((prev) => (prev.some((g) => g.id === gm.id) ? prev : [...prev, gm]));
       })
       .on("broadcast", { event: "gn" }, ({ payload }) => {
-        setGnLogs((prev) => [...prev, payload as GnLog]);
+        const gn = payload as GnLog;
+        setGnLogs((prev) => (prev.some((g) => g.id === gn.id) ? prev : [...prev, gn]));
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -144,41 +222,82 @@ export function useMultiplayer(username: string) {
     [username, playerId]
   );
 
-  const sendGm = useCallback(() => {
-    if (!channelRef.current) return;
+  const hasSaidGmToday = useMemo(() => {
+    const lower = username.toLowerCase();
+    return gmLogs.some(
+      (g) => g.name.toLowerCase() === lower && isSameLocalDay(g.timestamp, todayAnchor)
+    );
+  }, [gmLogs, username, todayAnchor]);
+
+  const hasSaidGnToday = useMemo(() => {
+    const lower = username.toLowerCase();
+    return gnLogs.some(
+      (g) => g.name.toLowerCase() === lower && isSameLocalDay(g.timestamp, todayAnchor)
+    );
+  }, [gnLogs, username, todayAnchor]);
+
+  const sendGm = useCallback(async (): Promise<GreetResult> => {
+    if (!username) return { ok: false, reason: "error" };
+    if (hasSaidGmToday) return { ok: false, reason: "already-said-today" };
+
+    const { data, error } = await supabase
+      .from("gm_logs")
+      .insert({ name: username })
+      .select("id, name, created_at")
+      .single();
+
+    if (error || !data) {
+      // 23505 = unique_violation => already said today (e.g. from another tab)
+      const reason = error?.code === "23505" ? "already-said-today" : "error";
+      return { ok: false, reason };
+    }
 
     const gm: GmLog = {
-      id: crypto.randomUUID(),
-      name: username,
-      timestamp: Date.now(),
+      id: data.id,
+      name: data.name,
+      timestamp: new Date(data.created_at).getTime(),
     };
 
-    channelRef.current.send({
+    channelRef.current?.send({
       type: "broadcast",
       event: "gm",
       payload: gm,
     });
 
-    setGmLogs((prev) => [...prev, gm]);
-  }, [username]);
+    setGmLogs((prev) => (prev.some((g) => g.id === gm.id) ? prev : [...prev, gm]));
+    return { ok: true };
+  }, [username, hasSaidGmToday]);
 
-  const sendGn = useCallback(() => {
-    if (!channelRef.current) return;
+  const sendGn = useCallback(async (): Promise<GreetResult> => {
+    if (!username) return { ok: false, reason: "error" };
+    if (hasSaidGnToday) return { ok: false, reason: "already-said-today" };
+
+    const { data, error } = await supabase
+      .from("gn_logs")
+      .insert({ name: username })
+      .select("id, name, created_at")
+      .single();
+
+    if (error || !data) {
+      const reason = error?.code === "23505" ? "already-said-today" : "error";
+      return { ok: false, reason };
+    }
 
     const gn: GnLog = {
-      id: crypto.randomUUID(),
-      name: username,
-      timestamp: Date.now(),
+      id: data.id,
+      name: data.name,
+      timestamp: new Date(data.created_at).getTime(),
     };
 
-    channelRef.current.send({
+    channelRef.current?.send({
       type: "broadcast",
       event: "gn",
       payload: gn,
     });
 
-    setGnLogs((prev) => [...prev, gn]);
-  }, [username]);
+    setGnLogs((prev) => (prev.some((g) => g.id === gn.id) ? prev : [...prev, gn]));
+    return { ok: true };
+  }, [username, hasSaidGnToday]);
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -211,7 +330,9 @@ export function useMultiplayer(username: string) {
     sendMessage,
     gmLogs,
     sendGm,
+    hasSaidGmToday,
     gnLogs,
     sendGn,
+    hasSaidGnToday,
   };
 }
