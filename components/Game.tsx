@@ -20,6 +20,7 @@ import GmRock from "./GmRock";
 import GmModal from "./GmModal";
 import GnRock from "./GnRock";
 import GnModal from "./GnModal";
+import WalletButton from "./WalletButton";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -906,6 +907,18 @@ export default function Game({ username, onUsernameChange }: GameProps) {
               >
                 ×
               </button>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{
+                display: "block",
+                marginBottom: 8,
+                color: "var(--charcoal-500)",
+                fontFamily: "var(--font-zen)",
+                fontSize: 13,
+              }}>
+                Ethereum Wallet
+              </label>
+              <WalletButton />
             </div>
             <p style={{
               margin: 0,

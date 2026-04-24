@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import Web3Provider from "./Web3Provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        {children}
+        <Web3Provider>{children}</Web3Provider>
         <Analytics />
       </body>
     </html>
