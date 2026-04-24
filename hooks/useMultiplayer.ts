@@ -24,11 +24,18 @@ export type GmLog = {
   timestamp: number;
 };
 
+export type GnLog = {
+  id: string;
+  name: string;
+  timestamp: number;
+};
+
 export function useMultiplayer(username: string) {
   const [otherPlayers, setOtherPlayers] = useState<Map<string, PlayerState>>(new Map());
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [gmLogs, setGmLogs] = useState<GmLog[]>([]);
+  const [gnLogs, setGnLogs] = useState<GnLog[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [playerId] = useState(() => crypto.randomUUID());
   const lastUpdateRef = useRef<number>(0);
@@ -61,6 +68,9 @@ export function useMultiplayer(username: string) {
       })
       .on("broadcast", { event: "gm" }, ({ payload }) => {
         setGmLogs((prev) => [...prev, payload as GmLog]);
+      })
+      .on("broadcast", { event: "gn" }, ({ payload }) => {
+        setGnLogs((prev) => [...prev, payload as GnLog]);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -152,6 +162,24 @@ export function useMultiplayer(username: string) {
     setGmLogs((prev) => [...prev, gm]);
   }, [username]);
 
+  const sendGn = useCallback(() => {
+    if (!channelRef.current) return;
+
+    const gn: GnLog = {
+      id: crypto.randomUUID(),
+      name: username,
+      timestamp: Date.now(),
+    };
+
+    channelRef.current.send({
+      type: "broadcast",
+      event: "gn",
+      payload: gn,
+    });
+
+    setGnLogs((prev) => [...prev, gn]);
+  }, [username]);
+
   const sendMessage = useCallback(
     (text: string) => {
       if (!text.trim() || !channelRef.current) return;
@@ -183,5 +211,7 @@ export function useMultiplayer(username: string) {
     sendMessage,
     gmLogs,
     sendGm,
+    gnLogs,
+    sendGn,
   };
 }
