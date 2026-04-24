@@ -18,6 +18,8 @@ import PerpRock from "./PerpRock";
 import PerpModal from "./PerpModal";
 import GmRock from "./GmRock";
 import GmModal from "./GmModal";
+import GnRock from "./GnRock";
+import GnModal from "./GnModal";
 import { useEmotes, EmoteType } from "@/hooks/useEmotes";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
@@ -27,6 +29,7 @@ const POND_POSITION: [number, number, number] = [-8, 0, -5];
 const TRADING_NPC_POSITION: [number, number, number] = [18, 0, -8];
 const PERP_ROCK_POSITION: [number, number, number] = [-20, 0, -15];
 const GM_ROCK_POSITION: [number, number, number] = [5, 0, -18];
+const GN_ROCK_POSITION: [number, number, number] = [-5, 0, -18];
 
 interface GameProps {
   username: string;
@@ -136,9 +139,11 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const [showPerpModal, setShowPerpModal] = useState(false);
   const [gmRockActivated, setGmRockActivated] = useState(false);
   const [showGmModal, setShowGmModal] = useState(false);
+  const [gnRockActivated, setGnRockActivated] = useState(false);
+  const [showGnModal, setShowGnModal] = useState(false);
   const [recentMessages, setRecentMessages] = useState<Map<string, string>>(new Map());
   const [isMobile, setIsMobile] = useState(false);
-  const { otherPlayers, connected, updatePosition, messages, sendMessage, gmLogs, sendGm } = useMultiplayer(username);
+  const { otherPlayers, connected, updatePosition, messages, sendMessage, gmLogs, sendGm, gnLogs, sendGn } = useMultiplayer(username);
 
   useEffect(() => {
     setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -209,6 +214,13 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   );
   const isNearGmRock = distanceToGmRock < 4;
 
+  // Check if player is near the gn rock
+  const distanceToGnRock = Math.sqrt(
+    Math.pow(localPosition[0] - GN_ROCK_POSITION[0], 2) +
+    Math.pow(localPosition[2] - GN_ROCK_POSITION[2], 2)
+  );
+  const isNearGnRock = distanceToGnRock < 4;
+
   // Handle F key press for interactions
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -249,12 +261,19 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           setShowGmModal(true);
           setTimeout(() => setGmRockActivated(false), 1500);
         }
+
+        if (isNearGnRock && !gnRockActivated) {
+          setGnRockActivated(true);
+          sendGn();
+          setShowGnModal(true);
+          setTimeout(() => setGnRockActivated(false), 1500);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated, isNearGmRock, gmRockActivated, sendGm]);
+  }, [isNearGoldenRock, goldenRockActivated, isNearPinkRock, pinkRockActivated, isNearPond, pondActivated, hasFishingRod, isNearTradingNPC, tradingNPCActivated, isNearPerpRock, perpRockActivated, isNearGmRock, gmRockActivated, sendGm, isNearGnRock, gnRockActivated, sendGn]);
 
   const handleMobileMove = useCallback((direction: { x: number; z: number }) => {
     setMobileInput(direction);
@@ -333,6 +352,11 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           position={GM_ROCK_POSITION}
           isNearby={isNearGmRock && !showGmModal}
           isActivated={gmRockActivated}
+        />
+        <GnRock
+          position={GN_ROCK_POSITION}
+          isNearby={isNearGnRock && !showGnModal}
+          isActivated={gnRockActivated}
         />
         <Player
           username={username}
@@ -576,6 +600,40 @@ export default function Game({ username, onUsernameChange }: GameProps) {
           }}
         >
           gm
+        </button>
+      )}
+
+      {/* Mobile interact button for gn rock */}
+      {isMobile && isNearGnRock && !gnRockActivated && (
+        <button
+          onClick={() => {
+            setGnRockActivated(true);
+            sendGn();
+            setShowGnModal(true);
+            setTimeout(() => setGnRockActivated(false), 1500);
+          }}
+          style={{
+            position: "fixed",
+            bottom: 240,
+            right: 50,
+            width: 70,
+            height: 70,
+            borderRadius: "50%",
+            backgroundColor: "rgba(59, 59, 109, 0.9)",
+            border: "3px solid #6C6CB0",
+            color: "#E6E6FA",
+            fontSize: 14,
+            fontWeight: 700,
+            fontFamily: "var(--font-zen)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+            zIndex: 100,
+          }}
+        >
+          gn
         </button>
       )}
 
@@ -839,6 +897,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
 
       <PerpModal isOpen={showPerpModal} onClose={() => setShowPerpModal(false)} />
       <GmModal isOpen={showGmModal} onClose={() => setShowGmModal(false)} gmLogs={gmLogs} />
+      <GnModal isOpen={showGnModal} onClose={() => setShowGnModal(false)} gnLogs={gnLogs} />
     </KeyboardControls>
   );
 }
