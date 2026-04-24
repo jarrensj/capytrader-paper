@@ -127,6 +127,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
   const { currentEmote, triggerEmote, clearEmote } = useEmotes();
   const [mobileInput, setMobileInput] = useState({ x: 0, z: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showTOS, setShowTOS] = useState(false);
   const [nameInput, setNameInput] = useState(username);
   const [localPosition, setLocalPosition] = useState<[number, number, number]>([0, 0, 0]);
@@ -690,32 +691,76 @@ export default function Game({ username, onUsernameChange }: GameProps) {
       >
         Beta
       </div>
-      <button
-        onClick={() => setShowSettings(true)}
+      <div
         style={{
           position: "fixed",
           top: 16,
           right: 16,
-          padding: "8px 16px",
-          borderRadius: "1rem",
-          backgroundColor: "var(--charcoal-700)",
-          color: "var(--matcha-cream)",
-          border: "none",
-          cursor: "pointer",
-          fontSize: 13,
-          fontWeight: 500,
-          fontFamily: "var(--font-zen)",
           display: "flex",
           alignItems: "center",
           gap: 8,
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-          transition: "background-color 0.2s ease-out",
         }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
       >
-        {username} <span style={{ opacity: 0.6, fontWeight: 400 }}>edit</span>
-      </button>
+        <button
+          onClick={() => setShowSettings(true)}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "1rem",
+            backgroundColor: "var(--charcoal-700)",
+            color: "var(--matcha-cream)",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: "var(--font-zen)",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+            transition: "background-color 0.2s ease-out",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
+        >
+          {username} <span style={{ opacity: 0.6, fontWeight: 400 }}>edit</span>
+        </button>
+        <button
+          onClick={() => setShowSettingsModal(true)}
+          aria-label="Settings"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            backgroundColor: "var(--charcoal-700)",
+            color: "var(--matcha-cream)",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+            transition: "background-color 0.2s ease-out",
+            padding: 0,
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-800)"}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "var(--charcoal-700)"}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </div>
       {showSettings && (
         <div
           style={{
@@ -748,7 +793,7 @@ export default function Game({ username, onUsernameChange }: GameProps) {
               fontSize: 20,
               fontWeight: 500,
             }}>
-              Settings
+              Edit Name
             </h3>
             <label style={{
               display: "block",
@@ -800,6 +845,77 @@ export default function Game({ username, onUsernameChange }: GameProps) {
             >
               Save
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 100,
+          }}
+          onClick={() => setShowSettingsModal(false)}
+        >
+          <div
+            className="sketch-border animate-fade-in"
+            style={{
+              backgroundColor: "var(--matcha-cream)",
+              padding: 28,
+              borderRadius: "1.5rem",
+              minWidth: 320,
+              maxWidth: 400,
+              boxShadow: "0 4px 24px rgba(0, 0, 0, 0.12)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}>
+              <h3 style={{
+                margin: 0,
+                color: "var(--charcoal-800)",
+                fontFamily: "var(--font-noto)",
+                fontSize: 20,
+                fontWeight: 500,
+              }}>
+                Settings
+              </h3>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                aria-label="Close"
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  color: "var(--charcoal-500)",
+                  padding: 4,
+                  lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <p style={{
+              margin: 0,
+              color: "var(--charcoal-500)",
+              fontFamily: "var(--font-zen)",
+              fontSize: 13,
+              lineHeight: 1.5,
+            }}>
+              More settings coming soon.
+            </p>
           </div>
         </div>
       )}
