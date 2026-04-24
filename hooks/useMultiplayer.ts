@@ -198,6 +198,17 @@ export function useMultiplayer(username: string) {
       });
 
       setMessages((prev) => [...prev.slice(-49), message]);
+
+      supabase
+        .from("messages")
+        .insert({
+          client_id: message.id,
+          name: message.name,
+          text: message.text,
+        })
+        .then(({ error }) => {
+          if (error) console.error("Failed to log chat message", error);
+        });
     },
     [username]
   );
