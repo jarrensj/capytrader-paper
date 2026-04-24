@@ -18,10 +18,17 @@ export type ChatMessage = {
   timestamp: number;
 };
 
+export type GmLog = {
+  id: string;
+  name: string;
+  timestamp: number;
+};
+
 export function useMultiplayer(username: string) {
   const [otherPlayers, setOtherPlayers] = useState<Map<string, PlayerState>>(new Map());
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [gmLogs, setGmLogs] = useState<GmLog[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [playerId] = useState(() => crypto.randomUUID());
   const lastUpdateRef = useRef<number>(0);
@@ -51,6 +58,9 @@ export function useMultiplayer(username: string) {
       })
       .on("broadcast", { event: "chat-message" }, ({ payload }) => {
         setMessages((prev) => [...prev.slice(-49), payload as ChatMessage]);
+      })
+      .on("broadcast", { event: "gm" }, ({ payload }) => {
+        setGmLogs((prev) => [...prev, payload as GmLog]);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
@@ -124,6 +134,24 @@ export function useMultiplayer(username: string) {
     [username, playerId]
   );
 
+  const sendGm = useCallback(() => {
+    if (!channelRef.current) return;
+
+    const gm: GmLog = {
+      id: crypto.randomUUID(),
+      name: username,
+      timestamp: Date.now(),
+    };
+
+    channelRef.current.send({
+      type: "broadcast",
+      event: "gm",
+      payload: gm,
+    });
+
+    setGmLogs((prev) => [...prev, gm]);
+  }, [username]);
+
   const sendMessage = useCallback(
     (text: string) => {
       if (!text.trim() || !channelRef.current) return;
@@ -153,5 +181,7 @@ export function useMultiplayer(username: string) {
     playerId,
     messages,
     sendMessage,
+    gmLogs,
+    sendGm,
   };
 }
